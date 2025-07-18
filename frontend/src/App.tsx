@@ -8,6 +8,8 @@ import { Profile } from "./components/Profile";
 import { useAuth } from "./hooks/useAuth";
 import { useStudents } from "./hooks/useStudents";
 import { DonatePage } from "./components/DonatePage";
+import { DonateRandomPage } from "./components/DonateRandomPage";
+import { DonateRevealPage } from "./components/DonateRevealPage";
 import type { Student } from "./types";
 
 function DonatePageWrapper() {
@@ -45,7 +47,8 @@ function App() {
     handleLogout,
     handleAuthSubmit,
     setError,
-    setSuccess
+    setSuccess,
+    setCurrentStudent
   } = useAuth();
 
   const { students, loading: studentsLoading, error: studentsError } = useStudents();
@@ -113,6 +116,7 @@ function App() {
     return (
       <Profile
         currentStudent={currentStudent}
+        setCurrentStudent={setCurrentStudent}
         onNavigate={page => {
           if (page === 'index') navigate('/');
           else if (page === 'login') navigate('/login');
@@ -130,6 +134,8 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/donate/random" element={<DonateRandomPage />} />
+        <Route path="/donate/reveal/:studentId" element={<DonateRevealPage />} />
         <Route path="/donate/:studentId" element={<DonatePageWrapper />} />
       </Routes>
     </Router>

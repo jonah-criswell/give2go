@@ -21,6 +21,13 @@ export const DonatePage = ({ student, onBack }: DonatePageProps) => {
    const [error, setError] = useState('');
    const [success, setSuccess] = useState('');
    const [loading, setLoading] = useState(false);
+   const [localBalance, setLocalBalance] = useState(Number(student.balance) || 0);
+
+   const redirectToIndex = () => {
+      if (typeof window !== 'undefined') {
+         window.location.href = '/';
+      }
+   };
 
    // Sync slider and input
    const handleSliderChange = (val: string) => {
@@ -34,8 +41,8 @@ export const DonatePage = ({ student, onBack }: DonatePageProps) => {
 
    // Calculate new balance and percentages
    const amt = Number(amount) || 0;
-   const prevBalance = balance;
-   const newBalance = Math.min(balance + amt, goal);
+   const prevBalance = localBalance;
+   const newBalance = Math.min(localBalance + amt, goal);
    const prevPercent = Math.min((prevBalance / goal) * 100, 100);
    const newPercent = Math.min((newBalance / goal) * 100, 100);
 
@@ -69,6 +76,7 @@ export const DonatePage = ({ student, onBack }: DonatePageProps) => {
          });
          const data = await res.json();
          if (!res.ok) {
+            console.error('Donation error response:', data);
             setError(data.errors?.join(', ') || 'Failed to submit donation.');
          } else {
             setSuccess('Thank you for your support!');
@@ -78,6 +86,9 @@ export const DonatePage = ({ student, onBack }: DonatePageProps) => {
             setEmail('');
             setPhone('');
             setNote('');
+            // Update local balance for immediate UI feedback
+            setLocalBalance(prev => Math.min(prev + amt, goal));
+            setTimeout(redirectToIndex, 1200);
          }
       } catch (err) {
          setError('Network error. Please try again.');
@@ -264,6 +275,11 @@ export const DonatePage = ({ student, onBack }: DonatePageProps) => {
                   </button>
                </form>
             </div>
+         </div>
+         <div className="w-full max-w-4xl mx-auto text-center mt-6 mb-2">
+            <p className="text-xs text-gray-400 italic">
+               This page is more for demo purposes, as cru.give.org already sets up how to donate. The donate button here can just route to the student's give site. There is no credit card payment API implemented; the button simply does the donation for free. There is a lot of flexibility in how to implement this, and this is just one way. This platform can be closely integrated with cru.give.org, or be a completely seperate platform!
+            </p>
          </div>
       </div>
    );

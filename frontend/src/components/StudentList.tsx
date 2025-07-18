@@ -32,6 +32,12 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                <div className="text-center mb-8">
                   <h1 className="text-3xl font-bold text-gray-900 mb-4">Student Mission Trip Fundraising</h1>
                   <p className="text-lg text-gray-600">Support students on their mission trips</p>
+                  <button
+                     className="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-md shadow transition-colors duration-200"
+                     onClick={() => window.location.href = '/donate/random'}
+                  >
+                     Donate to a Random Student
+                  </button>
                </div>
 
                {/* Student Cards Grid */}
@@ -62,6 +68,11 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                         {/* Student Name and University below image */}
                         <div className="w-full text-center mt-2 mb-1">
                            <div className="text-3xl md:text-4xl font-normal text-gray-900 truncate">{student.name}</div>
+                           {student.headline && (
+                              <div className="text-sm text-gray-500 font-normal mt-1 whitespace-pre-line break-words leading-snug" style={{ wordBreak: 'break-word', whiteSpace: 'pre-line' }}>
+                                 "{student.headline}"
+                              </div>
+                           )}
                            <div className="text-xs md:text-sm text-gray-500 mt-1 truncate">{student.university}</div>
                         </div>
 

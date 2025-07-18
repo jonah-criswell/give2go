@@ -14,7 +14,8 @@ export interface Student {
    year: string;
    balance: number;
    formatted_balance: string;
-   bio?: string;
+   bio?: string; // max 400 chars
+   headline?: string; // max 100 chars
    major?: string;
    profile_picture_url?: string;
    trip?: TripInfo;
@@ -44,6 +45,18 @@ export interface FormData {
 
 export interface ProfileFormData {
    bio: string;
+   headline: string;
    major: string;
    profile_picture?: File;
+}
+
+export interface Donation {
+   id: number;
+   amount: number;
+   name: string;
+   email?: string;
+   phone?: string;
+   note?: string;
+   student_id: number;
+   created_at: string;
 } 

@@ -1,32 +1,50 @@
 import { useState, useEffect } from 'react';
-import type { Student, ProfileFormData } from '../types';
+import type { Student, ProfileFormData, Donation } from '../types';
 
 interface ProfileProps {
    currentStudent: Student | null;
+   setCurrentStudent: (student: Student) => void;
    onNavigate: (page: 'index' | 'login' | 'register' | 'profile') => void;
 }
 
-export const Profile = ({ currentStudent, onNavigate }: ProfileProps) => {
+export const Profile = ({ currentStudent, setCurrentStudent, onNavigate }: ProfileProps) => {
    const [isEditing, setIsEditing] = useState(false);
    const [loading, setLoading] = useState(false);
    const [error, setError] = useState('');
    const [success, setSuccess] = useState('');
    const [formData, setFormData] = useState<ProfileFormData>({
       bio: '',
+      headline: '',
       major: '',
       profile_picture: undefined
    });
    const [selectedFile, setSelectedFile] = useState<File | null>(null);
    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+   const [donations, setDonations] = useState<Donation[]>([]);
+   const [donationsLoading, setDonationsLoading] = useState(false);
+   const [donationsError, setDonationsError] = useState('');
 
    useEffect(() => {
       if (currentStudent) {
          setFormData({
             bio: currentStudent.bio || '',
+            headline: currentStudent.headline || '',
             major: currentStudent.major || '',
             profile_picture: undefined
          });
          setPreviewUrl(currentStudent.profile_picture_url || null);
+
+         // Fetch donations for this student
+         setDonationsLoading(true);
+         setDonationsError('');
+         fetch(`/api/v1/donations?student_id=${currentStudent.id}`)
+            .then(res => {
+               if (!res.ok) throw new Error('Failed to fetch donations');
+               return res.json();
+            })
+            .then(data => setDonations(data))
+            .catch(() => setDonationsError('Could not load donors.'))
+            .finally(() => setDonationsLoading(false));
       }
    }, [currentStudent]);
 
@@ -64,6 +82,7 @@ export const Profile = ({ currentStudent, onNavigate }: ProfileProps) => {
          const formDataToSend = new FormData();
 
          formDataToSend.append('student[bio]', formData.bio);
+         formDataToSend.append('student[headline]', formData.headline);
          formDataToSend.append('student[major]', formData.major);
 
          if (selectedFile) {
@@ -82,11 +101,21 @@ export const Profile = ({ currentStudent, onNavigate }: ProfileProps) => {
             const data = await response.json();
             // Update localStorage with new student data
             localStorage.setItem('student', JSON.stringify(data.student));
+            setCurrentStudent(data.student);
             setSuccess('Profile updated successfully!');
             setIsEditing(false);
             setSelectedFile(null);
-            // Trigger a page reload to update the current student data
-            window.location.reload();
+            // Update the UI with the new student data
+            if (data.student) {
+               // Update formData and previewUrl with new data
+               setFormData({
+                  bio: data.student.bio || '',
+                  headline: data.student.headline || '',
+                  major: data.student.major || '',
+                  profile_picture: undefined
+               });
+               setPreviewUrl(data.student.profile_picture_url || null);
+            }
          } else {
             const errorData = await response.json();
             setError(errorData.errors?.join(', ') || 'Failed to update profile');
@@ -102,6 +131,7 @@ export const Profile = ({ currentStudent, onNavigate }: ProfileProps) => {
       if (currentStudent) {
          setFormData({
             bio: currentStudent.bio || '',
+            headline: currentStudent.headline || '',
             major: currentStudent.major || '',
             profile_picture: undefined
          });
@@ -161,6 +191,17 @@ export const Profile = ({ currentStudent, onNavigate }: ProfileProps) => {
                      </div>
                      <div>
                         <h1 className="text-3xl font-bold">{currentStudent.name}</h1>
+                        {currentStudent.headline && (
+                           <div className="text-base text-gray-200 font-normal mt-2 mb-2 italic whitespace-pre-line break-words leading-snug" style={{ wordBreak: 'break-word', whiteSpace: 'pre-line' }}>
+                              "{currentStudent.headline}"
+                           </div>
+                        )}
+                        {currentStudent.trip && (
+                           <div className="text-base text-blue-100 font-medium mb-1">
+                              {currentStudent.trip.name}
+                              <span className="text-blue-200"> — {currentStudent.trip.location_city}, {currentStudent.trip.location_country}</span>
+                           </div>
+                        )}
                         <p className="text-blue-100 text-lg">{currentStudent.university}</p>
                         {currentStudent.major && (
                            <p className="text-blue-100">{currentStudent.major}</p>
@@ -243,6 +284,21 @@ export const Profile = ({ currentStudent, onNavigate }: ProfileProps) => {
 
                               <div>
                                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                                    Headline <span className="text-gray-400">({formData.headline.length}/100)</span>
+                                 </label>
+                                 <input
+                                    type="text"
+                                    name="headline"
+                                    value={formData.headline}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g., Excited for my first mission trip!"
+                                    maxLength={100}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                 />
+                              </div>
+
+                              <div>
+                                 <label className="block text-sm font-medium text-gray-600 mb-2">
                                     Major
                                  </label>
                                  <input
@@ -258,14 +314,14 @@ export const Profile = ({ currentStudent, onNavigate }: ProfileProps) => {
 
                               <div>
                                  <label className="block text-sm font-medium text-gray-600 mb-2">
-                                    Bio <span className="text-gray-400">({formData.bio.length}/300)</span>
+                                    Bio <span className="text-gray-400">({formData.bio.length}/400)</span>
                                  </label>
                                  <textarea
                                     name="bio"
                                     value={formData.bio}
                                     onChange={handleInputChange}
                                     placeholder="Tell us about yourself, your mission trip goals, or why you're fundraising..."
-                                    maxLength={300}
+                                    maxLength={400}
                                     rows={4}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                                  />
@@ -311,6 +367,51 @@ export const Profile = ({ currentStudent, onNavigate }: ProfileProps) => {
                   </div>
                </div>
             </div>
+            {/* Donor List */}
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden mt-8">
+               <div className="px-8 py-8">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-4">Donors</h2>
+                  {donationsLoading ? (
+                     <div className="text-gray-500">Loading donors...</div>
+                  ) : donationsError ? (
+                     <div className="text-red-600">{donationsError}</div>
+                  ) : donations.length === 0 ? (
+                     <div className="text-gray-500 italic">No donations yet.</div>
+                  ) : (
+                     <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                           <thead>
+                              <tr>
+                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Note</th>
+                              </tr>
+                           </thead>
+                           <tbody className="bg-white divide-y divide-gray-100">
+                              {donations.map(donation => (
+                                 <tr key={donation.id}>
+                                    <td className="px-4 py-2 font-semibold text-green-700">${Number(donation.amount).toFixed(2)}</td>
+                                    <td className="px-4 py-2 text-gray-600">{new Date(donation.created_at).toLocaleString()}</td>
+                                    <td className="px-4 py-2">{donation.name}</td>
+                                    <td className="px-4 py-2">{donation.email || <span className="text-gray-400 italic">—</span>}</td>
+                                    <td className="px-4 py-2">{donation.phone || <span className="text-gray-400 italic">—</span>}</td>
+                                    <td className="px-4 py-2">{donation.note ? <span className="whitespace-pre-line">{donation.note}</span> : <span className="text-gray-400 italic">—</span>}</td>
+                                 </tr>
+                              ))}
+                           </tbody>
+                        </table>
+                     </div>
+                  )}
+               </div>
+            </div>
+         </div>
+         <div className="w-full max-w-4xl mx-auto text-center mt-6 mb-2">
+            <p className="text-xs text-gray-400 italic">
+               A lot of information here is already shown on smapp.cru.org when a student applies, so this is more for demo purposes. There is a lot of flexibility here!
+            </p>
          </div>
       </div>
    );

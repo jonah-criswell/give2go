@@ -117,6 +117,7 @@ export const useAuth = () => {
       handleLogout,
       handleAuthSubmit,
       setError,
-      setSuccess
+      setSuccess,
+      setCurrentStudent
    };
 }; 
