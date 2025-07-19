@@ -10,33 +10,11 @@ import { useStudents } from "./hooks/useStudents";
 import { DonatePage } from "./components/DonatePage";
 import { DonateRandomPage } from "./components/DonateRandomPage";
 import { DonateRevealPage } from "./components/DonateRevealPage";
+import { LandingPage } from "./components/LandingPage";
+import { ComingSoonPage } from "./components/ComingSoonPage";
 import type { Student } from "./types";
 
-function DonatePageWrapper() {
-  const { studentId } = useParams();
-  const navigate = useNavigate();
-  const [student, setStudent] = useState<Student | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  useEffect(() => {
-    setLoading(true);
-    fetch(`/api/v1/students`)
-      .then(res => res.json())
-      .then(data => {
-        // data is the array itself
-        const found = data.find((s: Student) => String(s.id) === studentId);
-        if (found) setStudent(found);
-        else setError("Student not found");
-      })
-      .catch(() => setError("Failed to load student."))
-      .finally(() => setLoading(false));
-  }, [studentId]);
-
-  if (loading) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-  if (error || !student) return <div className="flex justify-center items-center min-h-screen text-red-600">{error || "Student not found."}</div>;
-  return <DonatePage student={student} onBack={() => navigate('/')} />;
-}
 
 function App() {
   const {
@@ -51,10 +29,37 @@ function App() {
     setCurrentStudent
   } = useAuth();
 
-  const { students, loading: studentsLoading, error: studentsError } = useStudents();
+  const { students, loading: studentsLoading, error: studentsError, refetch: refetchStudents } = useStudents();
 
-  // Wrapper for main page to provide navigation handler
-  function MainPage() {
+  // Wrapper for donate page to provide navigation handler and refresh function
+  function DonatePageWrapper() {
+    const { studentId } = useParams();
+    const navigate = useNavigate();
+    const [student, setStudent] = useState<Student | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+      setLoading(true);
+      fetch(`/api/v1/students`)
+        .then(res => res.json())
+        .then(data => {
+          // data is the array itself
+          const found = data.find((s: Student) => String(s.id) === studentId);
+          if (found) setStudent(found);
+          else setError("Student not found");
+        })
+        .catch(() => setError("Failed to load student."))
+        .finally(() => setLoading(false));
+    }, [studentId]);
+
+    if (loading) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    if (error || !student) return <div className="flex justify-center items-center min-h-screen text-red-600">{error || "Student not found."}</div>;
+    return <DonatePage student={student} onBack={() => navigate(-1)} onDonationSuccess={refetchStudents} />;
+  }
+
+  // Wrapper for landing page to provide navigation handler
+  function LandingPageWrapper() {
     const navigate = useNavigate();
     const location = useLocation();
     const handleNavbarNavigate = (page: 'index' | 'login' | 'register' | 'profile') => {
@@ -64,8 +69,28 @@ function App() {
       else if (page === 'profile') navigate('/profile');
     };
     return (
+      <LandingPage
+        currentStudent={currentStudent}
+        onNavigate={handleNavbarNavigate}
+        onLogout={handleLogout}
+        onHomeClick={() => navigate('/')}
+      />
+    );
+  }
+
+  // Wrapper for students page to provide navigation handler
+  function StudentsPage() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const handleNavbarNavigate = (page: 'index' | 'login' | 'register' | 'profile') => {
+      if (page === 'index') navigate('/students');
+      else if (page === 'login') navigate('/login', { state: { from: location } });
+      else if (page === 'register') navigate('/register', { state: { from: location } });
+      else if (page === 'profile') navigate('/profile');
+    };
+    return (
       <>
-        <Navbar currentStudent={currentStudent} onNavigate={handleNavbarNavigate} onLogout={handleLogout} />
+        <Navbar currentStudent={currentStudent} onNavigate={handleNavbarNavigate} onLogout={handleLogout} onHomeClick={() => navigate('/')} />
         <StudentList
           students={students}
           loading={studentsLoading}
@@ -79,16 +104,16 @@ function App() {
   function LoginPage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const from = location.state?.from?.pathname || '/';
+    const from = location.state?.from?.pathname || '/students';
     return (
       <AuthForm
         isLogin
         loading={authLoading}
         error={authError}
         success={authSuccess}
-        onSubmit={(formData, selectedTripId) => handleAuthSubmit(formData, true, selectedTripId, () => navigate(from))}
-        onToggleMode={() => navigate('/register', { state: { from: location.state?.from || { pathname: '/' } } })}
-        onBackToIndex={() => navigate('/')}
+        onSubmit={(formData, selectedTripId) => handleAuthSubmit(formData, true, selectedTripId, () => navigate(from), refetchStudents)}
+        onToggleMode={() => navigate('/register', { state: { from: location.state?.from || { pathname: '/students' } } })}
+        onBackToIndex={() => navigate(-1)}
       />
     );
   }
@@ -96,16 +121,16 @@ function App() {
   function RegisterPage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const from = location.state?.from?.pathname || '/';
+    const from = location.state?.from?.pathname || '/students';
     return (
       <AuthForm
         isLogin={false}
         loading={authLoading}
         error={authError}
         success={authSuccess}
-        onSubmit={(formData, selectedTripId) => handleAuthSubmit(formData, false, selectedTripId, () => navigate(from))}
-        onToggleMode={() => navigate('/login', { state: { from: location.state?.from || { pathname: '/' } } })}
-        onBackToIndex={() => navigate('/')}
+        onSubmit={(formData, selectedTripId) => handleAuthSubmit(formData, false, selectedTripId, () => navigate(from), refetchStudents)}
+        onToggleMode={() => navigate('/login', { state: { from: location.state?.from || { pathname: '/students' } } })}
+        onBackToIndex={() => navigate(-1)}
       />
     );
   }
@@ -118,7 +143,7 @@ function App() {
         currentStudent={currentStudent}
         setCurrentStudent={setCurrentStudent}
         onNavigate={page => {
-          if (page === 'index') navigate('/');
+          if (page === 'index') navigate('/students');
           else if (page === 'login') navigate('/login');
           else if (page === 'register') navigate('/register');
           else if (page === 'profile') navigate('/profile');
@@ -130,13 +155,16 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<MainPage />} />
+        <Route path="/" element={<LandingPageWrapper />} />
+        <Route path="/students" element={<StudentsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/donate/random" element={<DonateRandomPage />} />
-        <Route path="/donate/reveal/:studentId" element={<DonateRevealPage />} />
+        <Route path="/donate/reveal/:studentId" element={<DonateRevealPage onStudentsUpdate={refetchStudents} />} />
         <Route path="/donate/:studentId" element={<DonatePageWrapper />} />
+        <Route path="/group-donate" element={<ComingSoonPage feature="Group Donate" description="Organize group donations with friends and family. This feature will allow you to create fundraising campaigns and invite others to contribute together." />} />
+        <Route path="/search" element={<ComingSoonPage feature="Search" description="Find students by university, trip, or location. Advanced search and filtering capabilities are coming soon." />} />
       </Routes>
     </Router>
   );

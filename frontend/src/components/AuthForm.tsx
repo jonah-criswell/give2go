@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { FormData, Trip } from '../types';
+import { useUniversities } from '../hooks/useUniversities';
 
 interface AuthFormProps {
    isLogin: boolean;
@@ -20,16 +22,18 @@ export const AuthForm = ({
    onToggleMode,
    onBackToIndex
 }: AuthFormProps) => {
+   const navigate = useNavigate();
    const [formData, setFormData] = useState<FormData>({
       name: "",
       email: "",
       password: "",
       password_confirmation: "",
-      university: "",
+      university_id: "",
       year: ""
    });
    const [availableTrips, setAvailableTrips] = useState<Trip[]>([]);
    const [selectedTripId, setSelectedTripId] = useState("");
+   const { universities, loading: universitiesLoading } = useUniversities();
 
    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setFormData({
@@ -51,7 +55,7 @@ export const AuthForm = ({
    useEffect(() => {
       const fetchTrips = async () => {
          try {
-            const response = await fetch('http://localhost:3001/api/v1/trips');
+            const response = await fetch('/api/v1/trips');
             if (response.ok) {
                const trips = await response.json();
                setAvailableTrips(trips);
@@ -68,7 +72,7 @@ export const AuthForm = ({
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 relative">
          {/* Back Button */}
          <button
-            onClick={onBackToIndex}
+            onClick={() => navigate(-1)}
             className="absolute top-6 left-6 flex items-center text-gray-600 hover:text-gray-800 transition-colors"
          >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,19 +129,25 @@ export const AuthForm = ({
                {!isLogin && (
                   <>
                      <div>
-                        <label htmlFor="university" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="university_id" className="block text-sm font-medium text-gray-700 mb-1">
                            University
                         </label>
-                        <input
-                           type="text"
-                           id="university"
-                           name="university"
-                           value={formData.university}
+                        <select
+                           id="university_id"
+                           name="university_id"
+                           value={formData.university_id}
                            onChange={handleInputChange}
                            required
+                           disabled={universitiesLoading}
                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="University of Texas"
-                        />
+                        >
+                           <option value="">Select your university</option>
+                           {universities.map((university) => (
+                              <option key={university.id} value={university.id}>
+                                 {university.abbreviation ? `${university.name} (${university.abbreviation})` : university.name}
+                              </option>
+                           ))}
+                        </select>
                      </div>
 
                      <div>

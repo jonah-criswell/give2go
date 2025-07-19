@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import type { Student } from '../types';
 
-export const DonateRevealPage = () => {
+interface DonateRevealPageProps {
+   onStudentsUpdate?: () => void;
+}
+
+export const DonateRevealPage = ({ onStudentsUpdate }: DonateRevealPageProps) => {
    const { studentId } = useParams();
    const navigate = useNavigate();
    const location = useLocation();
@@ -88,7 +92,12 @@ export const DonateRevealPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
                <button
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md shadow transition-colors duration-200"
-                  onClick={() => navigate('/')}
+                  onClick={() => {
+                     if (onStudentsUpdate) {
+                        onStudentsUpdate();
+                     }
+                     navigate(-1);
+                  }}
                >
                   Ok
                </button>

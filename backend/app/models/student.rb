@@ -27,14 +27,15 @@ class Student < ApplicationRecord
   end
   
   # Associations
+  belongs_to :university
   has_one :student_profile, dependent: :destroy
   has_one :trip, through: :student_profile
   
   # For filtering students by university
-  scope :by_university, ->(university) { where(university: university) }
+  scope :by_university, ->(university) { joins(:university).where(universities: { name: university }) }
   
   def display_name
-    "#{name} (#{university})"
+    "#{name} (#{university.name})"
   end
   
   def formatted_balance

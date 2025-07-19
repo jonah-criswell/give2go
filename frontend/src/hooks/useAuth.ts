@@ -19,7 +19,7 @@ export const useAuth = () => {
          // Then fetch fresh data from API
          const fetchFreshData = async () => {
             try {
-               const response = await fetch('http://localhost:3001/api/v1/student/profile', {
+               const response = await fetch('/api/v1/student/profile', {
                   headers: {
                      "Authorization": `Bearer ${token}`
                   }
@@ -52,7 +52,8 @@ export const useAuth = () => {
       formData: FormData,
       isLogin: boolean,
       selectedTripId: string,
-      onSuccess: () => void
+      onSuccess: () => void,
+      onStudentsUpdate?: () => void
    ) => {
       setLoading(true);
       setError("");
@@ -62,9 +63,9 @@ export const useAuth = () => {
          const endpoint = isLogin ? "/api/v1/login" : "/api/v1/register";
          const payload = isLogin
             ? { email: formData.email, password: formData.password }
-            : { student: formData };
+            : { student: formData, trip_id: selectedTripId };
 
-         const response = await fetch(`http://localhost:3001${endpoint}`, {
+         const response = await fetch(`${endpoint}`, {
             method: "POST",
             headers: {
                "Content-Type": "application/json",
@@ -75,30 +76,14 @@ export const useAuth = () => {
          const data = await response.json();
 
          if (response.ok) {
-            if (!isLogin && selectedTripId) {
-               // Link student to selected trip after successful registration
-               try {
-                  const tripResponse = await fetch(`http://localhost:3001/api/v1/trips`, {
-                     method: "POST",
-                     headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${data.token}`
-                     },
-                     body: JSON.stringify({ trip_id: selectedTripId }),
-                  });
-
-                  if (!tripResponse.ok) {
-                     console.warn("Trip linking failed:", await tripResponse.text());
-                  }
-               } catch (tripErr) {
-                  console.warn("Trip linking error:", tripErr);
-               }
-            }
-
             setCurrentStudent(data.student);
             localStorage.setItem("token", data.token);
             localStorage.setItem("student", JSON.stringify(data.student));
             onSuccess();
+            // Trigger students refresh after successful registration
+            if (!isLogin && onStudentsUpdate) {
+               onStudentsUpdate();
+            }
          } else {
             setError(data.error || data.errors?.join(", ") || "Something went wrong");
          }

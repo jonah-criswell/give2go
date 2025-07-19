@@ -1,19 +1,22 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Student } from '../types';
 
 interface DonatePageProps {
    student: Student;
    onBack: () => void;
+   onDonationSuccess?: () => void;
 }
 
-export const DonatePage = ({ student, onBack }: DonatePageProps) => {
+export const DonatePage = ({ student, onBack, onDonationSuccess }: DonatePageProps) => {
    // Calculate max donation (goal - balance, at least $0.01)
    const goal = student.trip?.goal_amount || 5000;
    const balance = Number(student.balance) || 0;
    const maxDonation = Math.max(goal - balance, 0.01);
+   const sliderMax = Math.min(1000, Math.max(1, maxDonation)); // Slider goes up to $1000 or maxDonation, whichever is smaller, but at least $1
 
    const [amount, setAmount] = useState('');
-   const [sliderAmount, setSliderAmount] = useState('1.00');
+   const [sliderAmount, setSliderAmount] = useState('1');
    const [name, setName] = useState('');
    const [email, setEmail] = useState('');
    const [phone, setPhone] = useState('');
@@ -36,7 +39,14 @@ export const DonatePage = ({ student, onBack }: DonatePageProps) => {
    };
    const handleAmountChange = (val: string) => {
       setAmount(val);
-      setSliderAmount(val);
+      // Only update slider if the amount is within slider range
+      const numVal = Number(val);
+      if (numVal <= sliderMax) {
+         setSliderAmount(val);
+      } else {
+         // If amount exceeds slider max, set slider to max
+         setSliderAmount(sliderMax.toString());
+      }
    };
 
    // Calculate new balance and percentages
@@ -50,8 +60,8 @@ export const DonatePage = ({ student, onBack }: DonatePageProps) => {
       e.preventDefault();
       setError('');
       setSuccess('');
-      if (!amount || isNaN(amt) || amt < 0.01 || amt > maxDonation) {
-         setError(`Please enter a valid donation amount between $0.01 and $${maxDonation.toFixed(2)}.`);
+      if (!amount || isNaN(amt) || amt < 1 || amt > maxDonation) {
+         setError(`Please enter a valid donation amount between $1 and $${maxDonation.toFixed(2)}.`);
          return;
       }
       if (note.length > 300) {
@@ -88,6 +98,10 @@ export const DonatePage = ({ student, onBack }: DonatePageProps) => {
             setNote('');
             // Update local balance for immediate UI feedback
             setLocalBalance(prev => Math.min(prev + amt, goal));
+            // Trigger students refresh
+            if (onDonationSuccess) {
+               onDonationSuccess();
+            }
             setTimeout(redirectToIndex, 1200);
          }
       } catch (err) {
@@ -102,7 +116,7 @@ export const DonatePage = ({ student, onBack }: DonatePageProps) => {
          {/* Back Button moved above the box */}
          <button
             className="mb-4 self-start text-gray-500 hover:text-blue-600 text-sm font-medium px-2 py-1 rounded transition-colors"
-            onClick={onBack}
+            onClick={() => navigate(-1)}
          >
             &larr; Back
          </button>
@@ -193,23 +207,23 @@ export const DonatePage = ({ student, onBack }: DonatePageProps) => {
                      <div className="flex items-center gap-2">
                         <input
                            type="range"
-                           min="0.01"
-                           max={maxDonation}
-                           step="0.01"
+                           min="1"
+                           max={sliderMax}
+                           step="1"
                            value={sliderAmount}
                            onChange={e => handleSliderChange(e.target.value)}
                            className="w-full accent-blue-600"
-                           disabled={maxDonation <= 0.01}
+                           disabled={maxDonation <= 1}
                         />
-                        <span className="text-xs text-gray-500 w-16 text-right">${Number(sliderAmount).toFixed(2)}</span>
+                        <span className="text-xs text-gray-500 w-16 text-right">${Number(sliderAmount).toFixed(0)}</span>
                      </div>
                      <div className="flex justify-between text-xs text-gray-400 mt-1">
-                        <span>${(0.01).toFixed(2)}</span>
-                        <span>Max: ${maxDonation.toFixed(2)}</span>
+                        <span>$1</span>
+                        <span>${sliderMax.toFixed(0)}</span>
                      </div>
                      <input
                         type="number"
-                        min="0.01"
+                        min="1"
                         max={maxDonation}
                         step="0.01"
                         className="w-full border border-gray-300 rounded-md px-3 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"

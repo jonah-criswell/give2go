@@ -21,7 +21,7 @@ class Api::V1::AuthController < ApplicationController
             id: student.id, 
             name: student.name, 
             email: student.email,
-            university: student.university,
+            university: student.university.name,
             year: student.year,
             balance: student.balance,
             formatted_balance: student.formatted_balance,
@@ -48,7 +48,7 @@ class Api::V1::AuthController < ApplicationController
           id: student.id, 
           name: student.name, 
           email: student.email,
-          university: student.university,
+          university: student.university.name,
           year: student.year,
           balance: student.balance,
           formatted_balance: student.formatted_balance,
@@ -74,7 +74,7 @@ class Api::V1::AuthController < ApplicationController
             id: student.id, 
             name: student.name, 
             email: student.email,
-            university: student.university,
+            university: student.university.name,
             year: student.year,
             balance: student.balance,
             formatted_balance: student.formatted_balance,
@@ -105,7 +105,7 @@ class Api::V1::AuthController < ApplicationController
               id: student.id, 
               name: student.name, 
               email: student.email,
-              university: student.university,
+              university: student.university.name,
               year: student.year,
               balance: student.balance,
               formatted_balance: student.formatted_balance,
@@ -129,7 +129,7 @@ class Api::V1::AuthController < ApplicationController
   private
 
   def student_params
-    params.require(:student).permit(:name, :email, :password, :password_confirmation, :university, :year, :headline)
+    params.require(:student).permit(:name, :email, :password, :password_confirmation, :university_id, :year, :headline)
   end
 
   def profile_params

@@ -89,7 +89,7 @@ export const Profile = ({ currentStudent, setCurrentStudent, onNavigate }: Profi
             formDataToSend.append('student[profile_picture]', selectedFile);
          }
 
-         const response = await fetch('http://localhost:3001/api/v1/student/profile', {
+         const response = await fetch('/api/v1/student/profile', {
             method: 'PATCH',
             headers: {
                'Authorization': `Bearer ${token}`

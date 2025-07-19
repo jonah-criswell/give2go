@@ -39,7 +39,7 @@ export interface FormData {
    email: string;
    password: string;
    password_confirmation: string;
-   university: string;
+   university_id: string;
    year: string;
 }
 

@@ -3,12 +3,12 @@ class Api::V1::StudentsController < ApplicationController
   before_action :authenticate_student, only: [:profile]
 
   def index
-    students = Student.includes(:trip).all.map do |student|
+    students = Student.includes(:trip, :university).all.map do |student|
       {
         id: student.id,
         name: student.name,
         email: student.email,
-        university: student.university,
+        university: student.university.name,
         year: student.year,
         balance: student.balance,
         formatted_balance: student.formatted_balance,
@@ -35,7 +35,7 @@ class Api::V1::StudentsController < ApplicationController
         id: @current_student.id, 
         name: @current_student.name, 
         email: @current_student.email,
-        university: @current_student.university,
+        university: @current_student.university.name,
         year: @current_student.year,
         balance: @current_student.balance,
         formatted_balance: @current_student.formatted_balance,

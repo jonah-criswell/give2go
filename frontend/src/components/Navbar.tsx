@@ -4,15 +4,21 @@ interface NavbarProps {
    currentStudent: Student | null;
    onNavigate: (page: 'index' | 'login' | 'register' | 'profile') => void;
    onLogout: () => void;
+   onHomeClick?: () => void;
 }
 
-export const Navbar = ({ currentStudent, onNavigate, onLogout }: NavbarProps) => {
+export const Navbar = ({ currentStudent, onNavigate, onLogout, onHomeClick }: NavbarProps) => {
    return (
       <nav className="bg-white shadow-lg">
          <div className="max-w-7xl mx-auto px-4">
             <div className="flex justify-between h-16">
                <div className="flex items-center">
-                  <h1 className="text-xl font-bold text-gray-900">Give2Go</h1>
+                  <img
+                     src="/give2go-logo.svg"
+                     alt="Give2Go"
+                     className="h-10 w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                     onClick={onHomeClick}
+                  />
                </div>
                <div className="flex items-center space-x-4">
                   <button
