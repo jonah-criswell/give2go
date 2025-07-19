@@ -1,5 +1,33 @@
 class Api::V1::StudentsController < ApplicationController
+  skip_before_action :authenticate_student!, only: [:index]
   before_action :authenticate_student, only: [:profile]
+
+  def index
+    students = Student.includes(:trip).all.map do |student|
+      {
+        id: student.id,
+        name: student.name,
+        email: student.email,
+        university: student.university,
+        year: student.year,
+        balance: student.balance,
+        formatted_balance: student.formatted_balance,
+        bio: student.bio,
+        headline: student.headline,
+        major: student.major,
+        profile_picture_url: student.profile_picture.attached? ? rails_blob_url(student.profile_picture) : nil,
+        trip: student.trip ? {
+          id: student.trip.id,
+          name: student.trip.name,
+          location_city: student.trip.location_city,
+          location_country: student.trip.location_country,
+          goal_amount: student.trip.goal_amount
+        } : nil
+      }
+    end
+    
+    render json: students
+  end
 
   def profile
     render json: { 
@@ -10,7 +38,10 @@ class Api::V1::StudentsController < ApplicationController
         university: @current_student.university,
         year: @current_student.year,
         balance: @current_student.balance,
-        formatted_balance: @current_student.formatted_balance
+        formatted_balance: @current_student.formatted_balance,
+        bio: @current_student.bio,
+        major: @current_student.major,
+        profile_picture_url: @current_student.profile_picture.attached? ? rails_blob_url(@current_student.profile_picture) : nil
       } 
     }
   end

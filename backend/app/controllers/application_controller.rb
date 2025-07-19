@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::API
-  before_action :authenticate_student!, except: [:register, :login]
+  before_action :authenticate_student!
 
   private
 

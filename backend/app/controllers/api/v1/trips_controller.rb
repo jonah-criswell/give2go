@@ -12,7 +12,9 @@ class Api::V1::TripsController < ApplicationController
   end
 
   def create
-    # This endpoint is now for creating student profiles (linking students to trips)
+    if current_student.student_profile.present?
+      render json: { errors: ["You are already associated with a trip."] }, status: :unprocessable_entity and return
+    end
     student_profile = current_student.build_student_profile(trip_id: params[:trip_id])
     
     if student_profile.save
