@@ -69,7 +69,7 @@ export const AuthForm = ({
    }, []);
 
    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 relative">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center justify-center p-4 relative">
          {/* Back Button */}
          <button
             onClick={() => navigate(-1)}
@@ -83,11 +83,9 @@ export const AuthForm = ({
 
          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
             <div className="text-center mb-8">
-               <h1 className="text-3xl font-bold text-gray-900 mb-2">Give2Go</h1>
-               <p className="text-gray-600">Student Mission Trip Fundraising</p>
-               <p className="text-lg font-medium text-gray-800 mt-4">
-                  {isLogin ? 'Welcome Back!' : 'Join Our Mission'}
-               </p>
+               <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  {isLogin ? 'Login' : 'Register:'}
+               </h1>
             </div>
 
             {/* Form */}
@@ -255,6 +253,13 @@ export const AuthForm = ({
                >
                   {loading ? "Loading..." : (isLogin ? "Login" : "Register")}
                </button>
+
+               <button
+                  type="button"
+                  className="w-full bg-cyan-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-cyan-700 transition-colors mt-3"
+               >
+                  Login With Okta
+               </button>
             </form>
 
             <div className="mt-6 text-center">
@@ -269,6 +274,15 @@ export const AuthForm = ({
                </button>
             </div>
          </div>
+
+         {/* Registration Info Message */}
+         {!isLogin && (
+            <div className="mt-6 text-center">
+               <p className="text-xs text-gray-500 leading-relaxed max-w-md mx-auto">
+                  In practice, registering would happen over at smapp.cru.org like normal, and after the student is accepted onto their mission, they would use their Okta credentials to authenticate on Give2Go, and data could/would be synced with smapp.cru.org, as it'd be the same account
+               </p>
+            </div>
+         )}
       </div>
    );
 }; 

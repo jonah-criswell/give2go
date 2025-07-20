@@ -23,7 +23,7 @@ export const Navbar = ({ currentStudent, onNavigate, onLogout, onHomeClick, show
                      />
                   ) : (
                      <img
-                        src="/Give2Go Logo Design.png"
+                        src="/Give2Go_Logo_Design-removebg-preview.png"
                         alt="Give2Go"
                         className="h-14 w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
                         onClick={onHomeClick}
