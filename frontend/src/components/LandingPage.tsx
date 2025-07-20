@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Navbar } from './Navbar';
 import type { Student } from '../types';
 
@@ -11,20 +12,98 @@ interface LandingPageProps {
 
 export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick }: LandingPageProps) => {
    const navigate = useNavigate();
+   const [featuredStudents, setFeaturedStudents] = useState<Student[]>([]);
+   const [loading, setLoading] = useState(false);
+
+   // Fetch and select featured students
+   useEffect(() => {
+      const fetchFeaturedStudents = async () => {
+         setLoading(true);
+         try {
+            const response = await fetch('/api/v1/students');
+            if (response.ok) {
+               const students: Student[] = await response.json();
+
+               // Filter students below 25% of their goal and exclude those at 100%
+               const lowProgressStudents = students.filter(student => {
+                  if (!student.trip?.goal_amount) return false;
+                  const progressPercentage = (student.balance / student.trip.goal_amount) * 100;
+                  return progressPercentage < 25;
+               });
+
+               // Filter out students at 100% for random selection
+               const eligibleStudents = students.filter(student => {
+                  if (!student.trip?.goal_amount) return false;
+                  const progressPercentage = (student.balance / student.trip.goal_amount) * 100;
+                  return progressPercentage < 100;
+               });
+
+               // Select 4 students: 3 below 25%, 1 random
+               let selectedStudents: Student[] = [];
+
+               if (lowProgressStudents.length >= 3) {
+                  // Take 3 low progress students
+                  const lowProgressSelected = lowProgressStudents
+                     .sort(() => Math.random() - 0.5)
+                     .slice(0, 3);
+
+                  // Get 1 random student from remaining eligible students
+                  const remainingStudents = eligibleStudents.filter(student =>
+                     !lowProgressSelected.includes(student)
+                  );
+                  const randomStudent = remainingStudents
+                     .sort(() => Math.random() - 0.5)
+                     .slice(0, 1);
+
+                  selectedStudents = [...lowProgressSelected, ...randomStudent];
+               } else if (lowProgressStudents.length > 0) {
+                  // Take all low progress students and fill with random ones
+                  selectedStudents = [...lowProgressStudents];
+                  const remainingStudents = eligibleStudents.filter(student =>
+                     !lowProgressStudents.includes(student)
+                  );
+                  const randomStudents = remainingStudents
+                     .sort(() => Math.random() - 0.5)
+                     .slice(0, 4 - lowProgressStudents.length);
+                  selectedStudents.push(...randomStudents);
+               } else {
+                  // No low progress students, select 4 random from eligible students
+                  selectedStudents = eligibleStudents
+                     .sort(() => Math.random() - 0.5)
+                     .slice(0, 4);
+               }
+
+               console.log('Selected students:', selectedStudents.length, selectedStudents.map(s => s.name));
+               setFeaturedStudents(selectedStudents);
+            }
+         } catch (error) {
+            console.error('Failed to fetch featured students:', error);
+         } finally {
+            setLoading(false);
+         }
+      };
+
+      fetchFeaturedStudents();
+   }, []);
 
    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-         <Navbar currentStudent={currentStudent} onNavigate={onNavigate} onLogout={onLogout} onHomeClick={onHomeClick} />
+      <div className="min-h-screen">
+         <Navbar currentStudent={currentStudent} onNavigate={onNavigate} onLogout={onLogout} onHomeClick={onHomeClick} showCruLogo={true} />
          {/* Hero Section */}
-         <div className="relative overflow-hidden">
+         <div className="relative overflow-hidden bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
                <div className="text-center">
-                  <h1
-                     className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 cursor-pointer hover:text-blue-600 transition-colors duration-200"
-                     onClick={() => navigate('/')}
-                  >
-                     Give2Go
-                  </h1>
+                  <div className="flex flex-col items-center mb-6">
+                     <img
+                        src="/Give2Go Logo Design.png"
+                        alt="Give2Go"
+                        className="h-48 md:h-64 w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200 mb-2"
+                        onClick={() => navigate('/')}
+                     />
+                     <p className="text-xs md:text-sm text-gray-400 font-light italic tracking-wide">
+                        A Cru Digital Service
+                     </p>
+                  </div>
                   <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
                      Empowering students to make a global impact through mission trips.
                      Connect with passionate students and support their journey to serve communities around the world.
@@ -48,7 +127,7 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
          </div>
 
          {/* Features Section */}
-         <div className="py-16 bg-white">
+         <div className="py-16 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                <div className="text-center mb-16">
                   <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -100,7 +179,7 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
          </div>
 
          {/* Action Cards Section */}
-         <div className="py-16 bg-gray-50">
+         <div className="py-16 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                <div className="text-center mb-12">
                   <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -193,6 +272,234 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
                         >
                            Coming Soon
                         </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         {/* Featured Students Section */}
+         <div className="py-16 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+               <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Students</h2>
+                  <p className="text-lg text-gray-600">Support these students who are working hard to reach their mission trip goals</p>
+               </div>
+
+               {loading ? (
+                  <div className="flex justify-center">
+                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                  </div>
+               ) : featuredStudents.length > 0 ? (
+                  <div className="grid grid-cols-4 gap-6">
+                     {featuredStudents.map((student) => (
+                        <div key={student.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
+                           {/* Student Profile Picture Header */}
+                           <div className="w-full aspect-square bg-gradient-to-br from-blue-500 to-purple-600 relative overflow-hidden">
+                              {student.profile_picture_url ? (
+                                 <img
+                                    src={student.profile_picture_url}
+                                    alt={student.name}
+                                    className="w-full h-full object-contain"
+                                    onError={(e) => {
+                                       // Hide the broken image and show the fallback
+                                       e.currentTarget.style.display = 'none';
+                                       const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                       if (fallback) {
+                                          fallback.style.display = 'flex';
+                                       }
+                                    }}
+                                 />
+                              ) : null}
+                              <div className="absolute inset-0 flex items-center justify-center text-white text-6xl font-bold" style={{ display: student.profile_picture_url ? 'none' : 'flex' }}>
+                                 {student.name.charAt(0).toUpperCase()}
+                              </div>
+                           </div>
+                           {/* Student Name and University below image */}
+                           <div className="w-full text-center mt-2 mb-1">
+                              <div className="text-3xl md:text-4xl font-normal text-gray-900 truncate">{student.name}</div>
+                              {student.headline && (
+                                 <div className="text-sm text-gray-500 font-normal mt-1 whitespace-pre-line break-words leading-snug" style={{ wordBreak: 'break-word', whiteSpace: 'pre-line' }}>
+                                    "{student.headline}"
+                                 </div>
+                              )}
+                              <div className="text-xs md:text-sm text-gray-500 mt-1 truncate">{student.university}</div>
+                           </div>
+
+                           {/* Trip Information */}
+                           <div className="px-4 py-3 bg-gray-50 flex flex-col justify-center min-h-[60px]">
+                              <div className="text-base font-semibold text-gray-800 truncate">{student.trip?.name || 'Mission Trip'}</div>
+                              <div className="flex items-center text-xs text-gray-500 mt-0.5 truncate">
+                                 <svg className="w-4 h-4 text-blue-500 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                 </svg>
+                                 <span>{student.trip?.location_city}, {student.trip?.location_country}</span>
+                              </div>
+                           </div>
+
+                           {/* Fundraising Progress */}
+                           <div className="p-4">
+                              <div className="flex justify-between items-center mb-2">
+                                 <span className="text-sm font-medium text-gray-700">Fundraising Progress</span>
+                                 <span className="text-sm text-gray-500">
+                                    ${parseFloat(student.balance.toString()).toLocaleString()}
+                                 </span>
+                              </div>
+
+                              {/* Progress Bar */}
+                              <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                 <div
+                                    className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-300"
+                                    style={{
+                                       width: `${Math.min((parseFloat(student.balance.toString()) / (student.trip?.goal_amount || 5000)) * 100, 100)}%`
+                                    }}
+                                 ></div>
+                              </div>
+
+                              {/* Goal Display */}
+                              <div className="flex justify-between items-center">
+                                 <span className="text-xs text-gray-500">Raised</span>
+                                 <span className="text-xs text-gray-500">
+                                    Goal: ${(student.trip?.goal_amount || 5000).toLocaleString()}
+                                 </span>
+                              </div>
+
+                              {/* Percentage */}
+                              <div className="text-center mt-2">
+                                 <span className="text-sm font-semibold text-green-600">
+                                    {Math.round((parseFloat(student.balance.toString()) / (student.trip?.goal_amount || 5000)) * 100)}% Complete
+                                 </span>
+                              </div>
+                           </div>
+
+                           {/* Support Button */}
+                           <div className="p-4 pt-0">
+                              <button
+                                 onClick={() => navigate(`/donate/${student.id}`)}
+                                 className="w-full block bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium text-center hover:bg-blue-700 transition-colors duration-200"
+                              >
+                                 Support {student.name.split(' ')[0]}
+                              </button>
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+               ) : (
+                  <div className="text-center text-gray-500">
+                     <p>No students available at the moment.</p>
+                  </div>
+               )}
+            </div>
+         </div>
+
+         {/* Testimonials Section */}
+         <div className="py-16 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+               <div className="text-center mb-16">
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                     Student Success Stories
+                  </h2>
+                  <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                     Hear from students who overcame their fears and successfully raised support for their mission trips.
+                  </p>
+               </div>
+
+               {/* Testimonial 1 - Image Left */}
+               <div className="mb-20">
+                  <div className="flex flex-col lg:flex-row items-center gap-12">
+                     <div className="lg:w-1/2">
+                        <img
+                           src="/MissionTrip.jpeg"
+                           alt="Student testimonial"
+                           className="w-full h-80 object-cover rounded-2xl shadow-lg"
+                        />
+                     </div>
+                     <div className="lg:w-1/2">
+                        <div className="bg-gray-50 p-8 rounded-2xl">
+                           <div className="flex items-center mb-4">
+                              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                                 <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                                 </svg>
+                              </div>
+                              <div>
+                                 <h3 className="text-xl font-semibold text-gray-900">Michael Chen</h3>
+                                 <p className="text-gray-600">University of Georgia</p>
+                              </div>
+                           </div>
+                           <blockquote className="text-lg text-gray-700 italic leading-relaxed">
+                              "I was terrified of asking people for money. Give2Go made fundraising feel natural and meaningful.
+                              I raised $4,200 for my mission trip to Kenya and discovered that people actually want to support
+                              students making a difference. The platform gave me confidence I never knew I had."
+                           </blockquote>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               {/* Testimonial 2 - Image Right */}
+               <div className="mb-20">
+                  <div className="flex flex-col lg:flex-row-reverse items-center gap-12">
+                     <div className="lg:w-1/2">
+                        <img
+                           src="/Homepage-Hero.jpg"
+                           alt="Student testimonial"
+                           className="w-full h-80 object-cover rounded-2xl shadow-lg"
+                        />
+                     </div>
+                     <div className="lg:w-1/2">
+                        <div className="bg-gray-50 p-8 rounded-2xl">
+                           <div className="flex items-center mb-4">
+                              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                 <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                                 </svg>
+                              </div>
+                              <div>
+                                 <h3 className="text-xl font-semibold text-gray-900">Emily Barentt</h3>
+                                 <p className="text-gray-600">Baylor University</p>
+                              </div>
+                           </div>
+                           <blockquote className="text-lg text-gray-700 italic leading-relaxed">
+                              "I was so nervous about fundraising that I almost didn't go on my mission trip. Give2Go changed
+                              everything. The platform made it easy to share my passion and connect with people who wanted to
+                              support my journey. I raised $5,100 and had the most incredible experience in Costa Rica!"
+                           </blockquote>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               {/* Testimonial 3 - Image Left */}
+               <div className="mb-20">
+                  <div className="flex flex-col lg:flex-row items-center gap-12">
+                     <div className="lg:w-1/2">
+                        <img
+                           src="/article-most-affordable-mission-trips-for-youth-adults-and-groups-01.jpg"
+                           alt="Student testimonial"
+                           className="w-full h-80 object-cover rounded-2xl shadow-lg"
+                        />
+                     </div>
+                     <div className="lg:w-1/2">
+                        <div className="bg-gray-50 p-8 rounded-2xl">
+                           <div className="flex items-center mb-4">
+                              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                                 <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                                 </svg>
+                              </div>
+                              <div>
+                                 <h3 className="text-xl font-semibold text-gray-900">Brett Fisher</h3>
+                                 <p className="text-gray-600">Texas A&M University</p>
+                              </div>
+                           </div>
+                           <blockquote className="text-lg text-gray-700 italic leading-relaxed">
+                              "The thought of fundraising was overwhelming. Give2Go broke it down into manageable steps and
+                              connected me with donors who genuinely cared about my mission. I went from being scared to
+                              excited about sharing my story. I raised $3,800 for my trip to Guatemala!"
+                           </blockquote>
+                        </div>
                      </div>
                   </div>
                </div>

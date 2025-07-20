@@ -5,20 +5,30 @@ interface NavbarProps {
    onNavigate: (page: 'index' | 'login' | 'register' | 'profile') => void;
    onLogout: () => void;
    onHomeClick?: () => void;
+   showCruLogo?: boolean;
 }
 
-export const Navbar = ({ currentStudent, onNavigate, onLogout, onHomeClick }: NavbarProps) => {
+export const Navbar = ({ currentStudent, onNavigate, onLogout, onHomeClick, showCruLogo }: NavbarProps) => {
    return (
-      <nav className="bg-white shadow-lg">
+      <nav className="bg-white shadow-lg border-b border-gray-200">
          <div className="max-w-7xl mx-auto px-4">
             <div className="flex justify-between h-16">
                <div className="flex items-center">
-                  <img
-                     src="/give2go-logo.svg"
-                     alt="Give2Go"
-                     className="h-10 w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
-                     onClick={onHomeClick}
-                  />
+                  {showCruLogo ? (
+                     <img
+                        src="/cru-logo-rgb (1).jpg"
+                        alt="Cru"
+                        className="h-16 w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                        onClick={onHomeClick}
+                     />
+                  ) : (
+                     <img
+                        src="/Give2Go Logo Design.png"
+                        alt="Give2Go"
+                        className="h-14 w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                        onClick={onHomeClick}
+                     />
+                  )}
                </div>
                <div className="flex items-center space-x-4">
                   <button
