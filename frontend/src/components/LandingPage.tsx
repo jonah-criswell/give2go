@@ -14,6 +14,11 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
    const navigate = useNavigate();
    const [featuredStudents, setFeaturedStudents] = useState<Student[]>([]);
    const [loading, setLoading] = useState(false);
+   const [searchTerm, setSearchTerm] = useState('');
+   const [selectedUniversity, setSelectedUniversity] = useState('');
+   const [selectedTrip, setSelectedTrip] = useState('');
+   const [universities, setUniversities] = useState<string[]>([]);
+   const [trips, setTrips] = useState<string[]>([]);
 
    // Fetch and select featured students
    useEffect(() => {
@@ -84,6 +89,30 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
       };
 
       fetchFeaturedStudents();
+   }, []);
+
+   // Fetch all students to get universities and trips for search dropdowns
+   useEffect(() => {
+      const fetchSearchData = async () => {
+         try {
+            const response = await fetch('/api/v1/students');
+            if (response.ok) {
+               const students: Student[] = await response.json();
+
+               // Extract unique universities
+               const uniqueUniversities = [...new Set(students.map(s => s.university).filter((u): u is string => Boolean(u)))];
+               setUniversities(uniqueUniversities.sort());
+
+               // Extract unique trips
+               const uniqueTrips = [...new Set(students.map(s => s.trip?.name).filter((t): t is string => Boolean(t)))];
+               setTrips(uniqueTrips.sort());
+            }
+         } catch (error) {
+            console.error('Failed to fetch search data:', error);
+         }
+      };
+
+      fetchSearchData();
    }, []);
 
    return (
@@ -178,101 +207,79 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
             </div>
          </div>
 
-         {/* Action Cards Section */}
+         {/* Search Section */}
          <div className="py-16 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-               <div className="text-center mb-12">
+               <div className="text-center mb-8">
                   <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                     Get Started Today
+                     Find Students to Support
                   </h2>
-                  <p className="text-lg text-gray-600">
-                     Choose how you'd like to make a difference
+                  <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                     Search and filter students by name, university, or trip name
                   </p>
                </div>
 
-               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {/* Browse Students */}
-                  <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                     <div className="p-6 text-center">
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                           <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                           </svg>
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Browse Students</h3>
-                        <p className="text-gray-600 text-sm mb-4">
-                           Explore student profiles and find someone to support
-                        </p>
-                        <button
-                           onClick={() => navigate('/students')}
-                           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+               <div className="bg-white rounded-lg shadow-lg p-8 max-w-4xl mx-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                     <div>
+                        <label htmlFor="quick-search" className="block text-sm font-medium text-gray-700 mb-2">
+                           Search by Name
+                        </label>
+                        <input
+                           type="text"
+                           id="quick-search"
+                           value={searchTerm}
+                           onChange={(e) => setSearchTerm(e.target.value)}
+                           placeholder="Enter student name..."
+                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                     </div>
+                     <div>
+                        <label htmlFor="quick-university" className="block text-sm font-medium text-gray-700 mb-2">
+                           University
+                        </label>
+                        <select
+                           id="quick-university"
+                           value={selectedUniversity}
+                           onChange={(e) => setSelectedUniversity(e.target.value)}
+                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
-                           View All Students
-                        </button>
+                           <option value="">All Universities</option>
+                           {universities.map(university => (
+                              <option key={university} value={university}>{university}</option>
+                           ))}
+                        </select>
+                     </div>
+                     <div>
+                        <label htmlFor="quick-trip" className="block text-sm font-medium text-gray-700 mb-2">
+                           Trip Name
+                        </label>
+                        <select
+                           id="quick-trip"
+                           value={selectedTrip}
+                           onChange={(e) => setSelectedTrip(e.target.value)}
+                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                           <option value="">All Trips</option>
+                           {trips.map(trip => (
+                              <option key={trip} value={trip}>{trip}</option>
+                           ))}
+                        </select>
                      </div>
                   </div>
-
-                  {/* Random Donation */}
-                  <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                     <div className="p-6 text-center">
-                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                           <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                           </svg>
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Random Donation</h3>
-                        <p className="text-gray-600 text-sm mb-4">
-                           Let us choose a student for you to support
-                        </p>
-                        <button
-                           onClick={() => navigate('/donate/random')}
-                           className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-                        >
-                           Donate Randomly
-                        </button>
-                     </div>
-                  </div>
-
-                  {/* Group Donate */}
-                  <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                     <div className="p-6 text-center">
-                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                           <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                           </svg>
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Group Donate</h3>
-                        <p className="text-gray-600 text-sm mb-4">
-                           Organize group donations with friends and family
-                        </p>
-                        <button
-                           onClick={() => navigate('/group-donate')}
-                           className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-                        >
-                           Coming Soon
-                        </button>
-                     </div>
-                  </div>
-
-                  {/* Search */}
-                  <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                     <div className="p-6 text-center">
-                        <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                           <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                           </svg>
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Search</h3>
-                        <p className="text-gray-600 text-sm mb-4">
-                           Find students by university, trip, or location
-                        </p>
-                        <button
-                           onClick={() => navigate('/search')}
-                           className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-                        >
-                           Coming Soon
-                        </button>
-                     </div>
+                  <div className="text-center">
+                     <button
+                        onClick={() => {
+                           const params = new URLSearchParams();
+                           if (searchTerm) params.append('search', searchTerm);
+                           if (selectedUniversity) params.append('university', selectedUniversity);
+                           if (selectedTrip) params.append('trip', selectedTrip);
+                           navigate(`/students?${params.toString()}`);
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg text-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
+                     >
+                        Search Students
+                     </button>
                   </div>
                </div>
             </div>
@@ -500,6 +507,106 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
                               excited about sharing my story. I raised $3,800 for my trip to Guatemala!"
                            </blockquote>
                         </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         {/* Action Cards Section */}
+         <div className="py-16 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+               <div className="text-center mb-12">
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                     Get Started Today
+                  </h2>
+                  <p className="text-lg text-gray-600">
+                     Choose how you'd like to make a difference
+                  </p>
+               </div>
+
+               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* Browse Students */}
+                  <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                     <div className="p-6 text-center">
+                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                           <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                           </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Browse Students</h3>
+                        <p className="text-gray-600 text-sm mb-4">
+                           Explore student profiles and find someone to support
+                        </p>
+                        <button
+                           onClick={() => navigate('/students')}
+                           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                        >
+                           View All Students
+                        </button>
+                     </div>
+                  </div>
+
+                  {/* Random Donation */}
+                  <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                     <div className="p-6 text-center">
+                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                           <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                           </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Random Donation</h3>
+                        <p className="text-gray-600 text-sm mb-4">
+                           Let us choose a student for you to support
+                        </p>
+                        <button
+                           onClick={() => navigate('/donate/random')}
+                           className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                        >
+                           Donate Randomly
+                        </button>
+                     </div>
+                  </div>
+
+                  {/* Group Donate */}
+                  <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                     <div className="p-6 text-center">
+                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                           <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                           </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Group Donate</h3>
+                        <p className="text-gray-600 text-sm mb-4">
+                           Organize group donations with friends and family
+                        </p>
+                        <button
+                           onClick={() => navigate('/group-donate')}
+                           className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                        >
+                           Coming Soon
+                        </button>
+                     </div>
+                  </div>
+
+                  {/* Search */}
+                  <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                     <div className="p-6 text-center">
+                        <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                           <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                           </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Search</h3>
+                        <p className="text-gray-600 text-sm mb-4">
+                           Find students by university, trip, or location
+                        </p>
+                        <button
+                           onClick={() => navigate('/search')}
+                           className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                        >
+                           Coming Soon
+                        </button>
                      </div>
                   </div>
                </div>

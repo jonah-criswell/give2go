@@ -1,5 +1,7 @@
+import React, { useState, useEffect } from 'react';
 import type { Student } from '../types';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { StudentSearch } from './StudentSearch';
 
 interface StudentListProps {
    students: Student[];
@@ -9,6 +11,46 @@ interface StudentListProps {
 }
 
 export const StudentList = ({ students, loading, error }: StudentListProps) => {
+   const [filteredStudents, setFilteredStudents] = useState<Student[]>(students);
+   const [searchParams] = useSearchParams();
+
+   // Update filtered students when the original students list changes
+   useEffect(() => {
+      setFilteredStudents(students);
+   }, [students]);
+
+   // Apply URL search parameters when component mounts or URL changes
+   useEffect(() => {
+      const urlSearch = searchParams.get('search') || '';
+      const urlUniversity = searchParams.get('university') || '';
+      const urlTrip = searchParams.get('trip') || '';
+
+      if (urlSearch || urlUniversity || urlTrip) {
+         let filtered = students.filter(student => {
+            // Name search
+            if (urlSearch && !student.name.toLowerCase().includes(urlSearch.toLowerCase())) {
+               return false;
+            }
+
+            // University filter
+            if (urlUniversity && student.university !== urlUniversity) {
+               return false;
+            }
+
+            // Trip filter
+            if (urlTrip && student.trip?.name !== urlTrip) {
+               return false;
+            }
+
+            return true;
+         });
+
+         setFilteredStudents(filtered);
+      } else {
+         setFilteredStudents(students);
+      }
+   }, [students, searchParams]);
+
    if (loading) {
       return (
          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -32,6 +74,16 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                <div className="text-center mb-8">
                   <h1 className="text-3xl font-bold text-gray-900 mb-4">Student Mission Trip Fundraising</h1>
                   <p className="text-lg text-gray-600">Support students on their mission trips</p>
+                  {searchParams.get('search') || searchParams.get('university') || searchParams.get('trip') ? (
+                     <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-800">
+                           Showing results for:
+                           {searchParams.get('search') && ` Name: "${searchParams.get('search')}"`}
+                           {searchParams.get('university') && ` University: ${searchParams.get('university')}`}
+                           {searchParams.get('trip') && ` Trip: ${searchParams.get('trip')}`}
+                        </p>
+                     </div>
+                  ) : null}
                   <button
                      className="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-md shadow transition-colors duration-200"
                      onClick={() => window.location.href = '/donate/random'}
@@ -40,9 +92,15 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                   </button>
                </div>
 
+               {/* Search and Filter Component */}
+               <StudentSearch
+                  students={students}
+                  onFilteredStudentsChange={setFilteredStudents}
+               />
+
                {/* Student Cards Grid */}
                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {students.map((student) => (
+                  {filteredStudents.map((student) => (
                      <div key={student.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
                         {/* Student Profile Picture Header */}
                         <div className="w-full aspect-square bg-gradient-to-br from-blue-500 to-purple-600 relative overflow-hidden">
@@ -137,7 +195,7 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                </div>
 
                {/* Empty State */}
-               {students.length === 0 && (
+               {filteredStudents.length === 0 && (
                   <div className="text-center py-12">
                      <div className="mx-auto h-12 w-12 text-gray-400 mb-4">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +203,12 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                         </svg>
                      </div>
                      <h3 className="text-lg font-medium text-gray-900 mb-2">No students found</h3>
-                     <p className="text-gray-500">Students will appear here once they register for mission trips.</p>
+                     <p className="text-gray-500">
+                        {students.length === 0
+                           ? "Students will appear here once they register for mission trips."
+                           : "Try adjusting your search criteria or filters."
+                        }
+                     </p>
                   </div>
                )}
             </div>
