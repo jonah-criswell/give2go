@@ -28,7 +28,14 @@ class Api::V1::AuthController < ApplicationController
             bio: student.bio,
             headline: student.headline,
             major: student.major,
-            profile_picture_url: student.profile_picture.attached? ? rails_blob_url(student.profile_picture) : nil
+            profile_picture_url: student.profile_picture.attached? ? rails_blob_url(student.profile_picture) : nil,
+            trip: student.trip ? {
+              id: student.trip.id,
+              name: student.trip.name,
+              location_city: student.trip.location_city,
+              location_country: student.trip.location_country,
+              goal_amount: student.trip.goal_amount
+            } : nil
           } 
         }, status: :created
       else
@@ -55,7 +62,14 @@ class Api::V1::AuthController < ApplicationController
           bio: student.bio,
           headline: student.headline,
           major: student.major,
-          profile_picture_url: student.profile_picture.attached? ? rails_blob_url(student.profile_picture) : nil
+          profile_picture_url: student.profile_picture.attached? ? rails_blob_url(student.profile_picture) : nil,
+          trip: student.trip ? {
+            id: student.trip.id,
+            name: student.trip.name,
+            location_city: student.trip.location_city,
+            location_country: student.trip.location_country,
+            goal_amount: student.trip.goal_amount
+          } : nil
         } 
       }
     else
@@ -81,7 +95,14 @@ class Api::V1::AuthController < ApplicationController
             bio: student.bio,
             headline: student.headline,
             major: student.major,
-            profile_picture_url: student.profile_picture.attached? ? rails_blob_url(student.profile_picture) : nil
+            profile_picture_url: student.profile_picture.attached? ? rails_blob_url(student.profile_picture) : nil,
+            trip: student.trip ? {
+              id: student.trip.id,
+              name: student.trip.name,
+              location_city: student.trip.location_city,
+              location_country: student.trip.location_country,
+              goal_amount: student.trip.goal_amount
+            } : nil
           } 
         }
       rescue JWT::DecodeError, ActiveRecord::RecordNotFound
@@ -112,7 +133,14 @@ class Api::V1::AuthController < ApplicationController
               bio: student.bio,
               headline: student.headline,
               major: student.major,
-              profile_picture_url: student.profile_picture.attached? ? rails_blob_url(student.profile_picture) : nil
+              profile_picture_url: student.profile_picture.attached? ? rails_blob_url(student.profile_picture) : nil,
+              trip: student.trip ? {
+                id: student.trip.id,
+                name: student.trip.name,
+                location_city: student.trip.location_city,
+                location_country: student.trip.location_country,
+                goal_amount: student.trip.goal_amount
+              } : nil
             } 
           }
         else

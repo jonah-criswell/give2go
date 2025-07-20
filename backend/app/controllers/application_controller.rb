@@ -5,7 +5,10 @@ class ApplicationController < ActionController::API
 
   def authenticate_student!
     header = request.headers['Authorization']
-    token = header.split(' ').last if header
+    return render json: { error: 'Authorization header missing' }, status: :unauthorized unless header
+    
+    token = header.split(' ').last
+    return render json: { error: 'Invalid authorization format' }, status: :unauthorized unless token
     
     begin
       decoded = JwtService.decode(token)

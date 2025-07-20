@@ -13,6 +13,9 @@ class Student < ApplicationRecord
   validates :bio, length: { maximum: 400 }, allow_blank: true
   validates :headline, length: { maximum: 100 }, allow_blank: true
   validates :major, length: { maximum: 100 }, allow_blank: true
+  # Note: Trip validation is handled through student_profile association
+  # Students must have a student_profile which links them to a trip
+  # validates :student_profile, presence: { message: "must be assigned to a mission trip" }
   
   # Profile picture validation
   validates_each :profile_picture do |record, attr, value|

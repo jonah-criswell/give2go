@@ -65,7 +65,14 @@ class Api::V1::StudentsController < ApplicationController
         formatted_balance: @current_student.formatted_balance,
         bio: @current_student.bio,
         major: @current_student.major,
-        profile_picture_url: @current_student.profile_picture.attached? ? rails_blob_url(@current_student.profile_picture) : nil
+        profile_picture_url: @current_student.profile_picture.attached? ? rails_blob_url(@current_student.profile_picture) : nil,
+        trip: @current_student.trip ? {
+          id: @current_student.trip.id,
+          name: @current_student.trip.name,
+          location_city: @current_student.trip.location_city,
+          location_country: @current_student.trip.location_country,
+          goal_amount: @current_student.trip.goal_amount
+        } : nil
       } 
     }
   end
