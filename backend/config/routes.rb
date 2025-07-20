@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       get '/students', to: 'students#index'
 
       resources :donations, only: [:create, :index]
+      resources :group_donations, only: [:create]
       
       resources :trips, only: [:index, :show, :create, :update, :destroy]
     end

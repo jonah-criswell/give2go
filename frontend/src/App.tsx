@@ -12,6 +12,9 @@ import { DonateRandomPage } from "./components/DonateRandomPage";
 import { DonateRevealPage } from "./components/DonateRevealPage";
 import { LandingPage } from "./components/LandingPage";
 import { ComingSoonPage } from "./components/ComingSoonPage";
+import { GroupDonatePage } from "./components/GroupDonatePage";
+import { GroupDonateSuccessPage } from "./components/GroupDonateSuccessPage";
+import { GroupDonateInfoPage } from "./components/GroupDonateInfoPage";
 import type { Student } from "./types";
 
 
@@ -152,6 +155,67 @@ function App() {
     );
   }
 
+  // Wrapper for group donate info page to provide navigation handler
+  function GroupDonateInfoPageWrapper() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const handleNavbarNavigate = (page: 'index' | 'login' | 'register' | 'profile') => {
+      if (page === 'index') navigate('/');
+      else if (page === 'login') navigate('/login', { state: { from: location } });
+      else if (page === 'register') navigate('/register', { state: { from: location } });
+      else if (page === 'profile') navigate('/profile');
+    };
+    return (
+      <GroupDonateInfoPage
+        currentStudent={currentStudent}
+        onNavigate={handleNavbarNavigate}
+        onLogout={handleLogout}
+        onHomeClick={() => navigate('/')}
+      />
+    );
+  }
+
+  // Wrapper for group donate page to provide navigation handler
+  function GroupDonatePageWrapper() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const handleNavbarNavigate = (page: 'index' | 'login' | 'register' | 'profile') => {
+      if (page === 'index') navigate('/');
+      else if (page === 'login') navigate('/login', { state: { from: location } });
+      else if (page === 'register') navigate('/register', { state: { from: location } });
+      else if (page === 'profile') navigate('/profile');
+    };
+    return (
+      <GroupDonatePage
+        currentStudent={currentStudent}
+        onNavigate={handleNavbarNavigate}
+        onLogout={handleLogout}
+        onHomeClick={() => navigate('/')}
+      />
+    );
+  }
+
+  // Wrapper for group donate success page to provide navigation handler
+  function GroupDonateSuccessPageWrapper() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const handleNavbarNavigate = (page: 'index' | 'login' | 'register' | 'profile') => {
+      if (page === 'index') navigate('/');
+      else if (page === 'login') navigate('/login', { state: { from: location } });
+      else if (page === 'register') navigate('/register', { state: { from: location } });
+      else if (page === 'profile') navigate('/profile');
+    };
+    return (
+      <GroupDonateSuccessPage
+        currentStudent={currentStudent}
+        onNavigate={handleNavbarNavigate}
+        onLogout={handleLogout}
+        onHomeClick={() => navigate('/')}
+        refetchStudents={refetchStudents}
+      />
+    );
+  }
+
   return (
     <Router>
       <Routes>
@@ -163,7 +227,9 @@ function App() {
         <Route path="/donate/random" element={<DonateRandomPage />} />
         <Route path="/donate/reveal/:studentId" element={<DonateRevealPage onStudentsUpdate={refetchStudents} />} />
         <Route path="/donate/:studentId" element={<DonatePageWrapper />} />
-        <Route path="/group-donate" element={<ComingSoonPage feature="Group Donate" description="Organize group donations with friends and family. This feature will allow you to create fundraising campaigns and invite others to contribute together." />} />
+        <Route path="/group-donate" element={<GroupDonatePageWrapper />} />
+        <Route path="/group-donate/success" element={<GroupDonateSuccessPageWrapper />} />
+        <Route path="/group-donate-info" element={<GroupDonateInfoPageWrapper />} />
         <Route path="/search" element={<ComingSoonPage feature="Search" description="Find students by university, trip, or location. Advanced search and filtering capabilities are coming soon." />} />
       </Routes>
     </Router>

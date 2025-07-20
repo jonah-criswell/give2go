@@ -3,7 +3,7 @@ class Api::V1::StudentsController < ApplicationController
   before_action :authenticate_student, only: [:profile]
 
   def index
-    students = Student.includes(:trip, :university).all.map do |student|
+    students = Student.includes(:trip, :university).order_by_progress.map do |student|
       {
         id: student.id,
         name: student.name,

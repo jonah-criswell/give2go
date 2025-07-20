@@ -14,6 +14,8 @@ export const StudentSearch = ({ students, onFilteredStudentsChange }: StudentSea
    const [selectedTrip, setSelectedTrip] = useState('');
    const [progressFilter, setProgressFilter] = useState('');
    const [sortBy, setSortBy] = useState('name');
+   // Add a random seed that changes on mount and when search/filter criteria change
+   const [randomSeed, setRandomSeed] = useState(() => Math.random());
 
    // Initialize search state from URL parameters
    useEffect(() => {
@@ -24,7 +26,13 @@ export const StudentSearch = ({ students, onFilteredStudentsChange }: StudentSea
       setSearchTerm(urlSearch);
       setSelectedUniversity(urlUniversity);
       setSelectedTrip(urlTrip);
+      setRandomSeed(Math.random()); // Change the seed when search params change
    }, [searchParams]);
+
+   // Also update the seed when students, progressFilter, or sortBy change (for full re-randomization)
+   useEffect(() => {
+      setRandomSeed(Math.random());
+   }, [students, progressFilter, sortBy]);
 
    // Get unique universities and trips for filter options
    const universities = useMemo(() => {
@@ -83,11 +91,32 @@ export const StudentSearch = ({ students, onFilteredStudentsChange }: StudentSea
          return true;
       });
 
-      // Sort students
+      // Always randomize order (but 100%+ last) if sortBy is 'name', regardless of filters
+      if (sortBy === 'name') {
+         // Separate students at 100%+
+         const notComplete = filtered.filter(s => {
+            const goal = s.trip?.goal_amount || 0;
+            return !(goal > 0 && s.balance >= goal);
+         });
+         const complete = filtered.filter(s => {
+            const goal = s.trip?.goal_amount || 0;
+            return goal > 0 && s.balance >= goal;
+         });
+         // Shuffle notComplete using the randomSeed
+         function seededRandom(seed: number) {
+            var x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+         }
+         for (let i = notComplete.length - 1; i > 0; i--) {
+            const j = Math.floor(seededRandom(randomSeed * 10000 + i) * (i + 1));
+            [notComplete[i], notComplete[j]] = [notComplete[j], notComplete[i]];
+         }
+         return [...notComplete, ...complete];
+      }
+
+      // Otherwise, sort by selected option
       filtered.sort((a, b) => {
          switch (sortBy) {
-            case 'name':
-               return a.name.localeCompare(b.name);
             case 'progress':
                const progressA = a.trip?.goal_amount ? (a.balance / a.trip.goal_amount) * 100 : 0;
                const progressB = b.trip?.goal_amount ? (b.balance / b.trip.goal_amount) * 100 : 0;
@@ -102,7 +131,7 @@ export const StudentSearch = ({ students, onFilteredStudentsChange }: StudentSea
       });
 
       return filtered;
-   }, [students, searchTerm, selectedUniversity, selectedTrip, progressFilter, sortBy]);
+   }, [students, searchTerm, selectedUniversity, selectedTrip, progressFilter, sortBy, randomSeed]);
 
    // Update parent component when filtered results change
    React.useEffect(() => {

@@ -34,6 +34,14 @@ class Student < ApplicationRecord
   # For filtering students by university
   scope :by_university, ->(university) { joins(:university).where(universities: { name: university }) }
   
+  # Scope to order students so that those at 100% of their goal are last
+  scope :order_by_progress, -> {
+    joins("LEFT JOIN student_profiles ON student_profiles.student_id = students.id")
+      .joins("LEFT JOIN trips ON trips.id = student_profiles.trip_id")
+      .select('students.*, COALESCE(students.balance / NULLIF(trips.goal_amount, 0), 0) AS progress_ratio, trips.goal_amount AS trip_goal')
+      .order(Arel.sql('CASE WHEN trips.goal_amount IS NOT NULL AND students.balance >= trips.goal_amount THEN 1 ELSE 0 END, progress_ratio DESC'))
+  }
+  
   def display_name
     "#{name} (#{university.name})"
   end
