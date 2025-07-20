@@ -13,10 +13,13 @@ interface StudentListProps {
 export const StudentList = ({ students, loading, error }: StudentListProps) => {
    const [filteredStudents, setFilteredStudents] = useState<Student[]>(students);
    const [searchParams] = useSearchParams();
+   const [currentPage, setCurrentPage] = useState(1);
+   const studentsPerPage = 16;
 
    // Update filtered students when the original students list changes
    useEffect(() => {
       setFilteredStudents(students);
+      setCurrentPage(1); // Reset to first page when students change
    }, [students]);
 
    // Apply URL search parameters when component mounts or URL changes
@@ -46,21 +49,60 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
          });
 
          setFilteredStudents(filtered);
+         setCurrentPage(1); // Reset to first page when filters change
       } else {
          setFilteredStudents(students);
+         setCurrentPage(1); // Reset to first page when filters clear
       }
    }, [students, searchParams]);
 
+   // Calculate pagination
+   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+   const startIndex = (currentPage - 1) * studentsPerPage;
+   const endIndex = startIndex + studentsPerPage;
+   const currentStudents = filteredStudents.slice(startIndex, endIndex);
 
+   // Handle page changes
+   const handlePageChange = (page: number) => {
+      setCurrentPage(page);
+      // Scroll to top of student list
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+   };
 
+   // Generate page numbers for pagination
+   const getPageNumbers = () => {
+      const pages = [];
+      const maxVisiblePages = 5;
 
+      if (totalPages <= maxVisiblePages) {
+         // Show all pages if total is small
+         for (let i = 1; i <= totalPages; i++) {
+            pages.push(i);
+         }
+      } else {
+         // Show pages around current page
+         let start = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+         let end = Math.min(totalPages, start + maxVisiblePages - 1);
+
+         // Adjust start if we're near the end
+         if (end === totalPages) {
+            start = Math.max(1, end - maxVisiblePages + 1);
+         }
+
+         for (let i = start; i <= end; i++) {
+            pages.push(i);
+         }
+      }
+
+      return pages;
+   };
 
    return (
       <div className="min-h-screen bg-gray-50">
          <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             <div className="px-4 py-6 sm:px-0">
                <div className="text-center mb-8">
-                  <h1 className="text-4xl md:text-5xl text-gray-900 mb-6">Browse the complete list of students looking for support:</h1>
+                  <h1 className="text-4xl md:text-5xl text-gray-900 mb-6">Browse the complete list of students looking for support.</h1>
                   {searchParams.get('search') || searchParams.get('university') || searchParams.get('trip') ? (
                      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-sm text-blue-800">
@@ -71,20 +113,6 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                         </p>
                      </div>
                   ) : null}
-                  <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center items-center">
-                     <button
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 text-lg"
-                        onClick={() => window.location.href = '/donate/random'}
-                     >
-                        Donate to a Random Student
-                     </button>
-                     <button
-                        className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 text-lg"
-                        onClick={() => window.location.href = '/group-donate-info'}
-                     >
-                        Donate to Multiple Students
-                     </button>
-                  </div>
                </div>
 
                {/* Search and Filter Component */}
@@ -93,7 +121,14 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                   onFilteredStudentsChange={setFilteredStudents}
                />
 
-
+               {/* Results count and pagination info */}
+               {!loading && !error && filteredStudents.length > 0 && (
+                  <div className="mb-6 text-center">
+                     <p className="text-gray-600">
+                        Showing {startIndex + 1}-{Math.min(endIndex, filteredStudents.length)} of {filteredStudents.length} students
+                     </p>
+                  </div>
+               )}
 
                {/* Student Cards Grid */}
                {loading ? (
@@ -112,7 +147,7 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                   </div>
                ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                     {filteredStudents.map((student) => {
+                     {currentStudents.map((student) => {
                         const percent = Math.floor((parseFloat(student.balance.toString()) / (student.trip?.goal_amount || 5000)) * 100);
                         const percentDisplay = (percent >= 100 ? 100 : percent) + '% Complete';
                         return (
@@ -209,6 +244,45 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                   </div>
                )}
 
+               {/* Pagination Controls */}
+               {!loading && !error && totalPages > 1 && (
+                  <div className="mt-12 flex justify-center">
+                     <nav className="flex items-center space-x-2">
+                        {/* Previous button */}
+                        <button
+                           onClick={() => handlePageChange(currentPage - 1)}
+                           disabled={currentPage === 1}
+                           className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                           Previous
+                        </button>
+
+                        {/* Page numbers */}
+                        {getPageNumbers().map((page) => (
+                           <button
+                              key={page}
+                              onClick={() => handlePageChange(page)}
+                              className={`px-3 py-2 text-sm font-medium rounded-md ${currentPage === page
+                                    ? 'bg-blue-600 text-white'
+                                    : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                                 }`}
+                           >
+                              {page}
+                           </button>
+                        ))}
+
+                        {/* Next button */}
+                        <button
+                           onClick={() => handlePageChange(currentPage + 1)}
+                           disabled={currentPage === totalPages}
+                           className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                           Next
+                        </button>
+                     </nav>
+                  </div>
+               )}
+
                {/* Empty State */}
                {!loading && !error && filteredStudents.length === 0 && (
                   <div className="text-center py-12">
@@ -226,6 +300,29 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                      </p>
                   </div>
                )}
+
+               {/* Other ways to donate section */}
+               <div className="mt-16">
+                  <div className="bg-white rounded-lg shadow-lg p-8 max-w-4xl mx-auto">
+                     <div className="text-center">
+                        <h1 className="text-4xl md:text-5xl font-normal text-gray-900 mb-6">Other ways to give:</h1>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                           <button
+                              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 text-lg"
+                              onClick={() => window.location.href = '/donate/random'}
+                           >
+                              Donate to a Random Student
+                           </button>
+                           <button
+                              className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 text-lg"
+                              onClick={() => window.location.href = '/group-donate-info'}
+                           >
+                              Donate to Multiple Students
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+               </div>
             </div>
          </div>
       </div>

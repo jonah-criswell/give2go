@@ -116,6 +116,92 @@ Let's say you donate **$100** to a group of **4 students**:
 
 **Our system is smart:** The excess $5 from Student A is automatically redistributed evenly among the other students who still need funds, ensuring the best possible distribution without any student exceeding their goal!
 
+## Unequal Distribution Algorithm
+
+Give2Go also supports an advanced unequal distribution system that allows donors to bias donations toward students with higher fundraising needs. This feature provides more nuanced control over how funds are distributed.
+
+### Unequal Distribution Code Snippet
+
+```typescript
+// Helper for recursive redistribution
+function distribute(amountLeft: number, needsLeft: number[], excluded: Set<number> = new Set()): number[] {
+   // Calculate weights for students not excluded
+   let weights = needsLeft.map((need: number, i: number) => {
+      if (excluded.has(i) || need <= 0) return 0;
+      const equal = 1 / (N - excluded.size);
+      const proportional = totalNeed > 0 ? need / totalNeed : equal;
+      return (1 - biasFactor) * equal + biasFactor * proportional;
+   });
+   const totalWeight = weights.reduce((a: number, b: number) => a + b, 0);
+   if (totalWeight === 0) return Array(N).fill(0);
+   
+   // Initial allocation
+   let allocation = weights.map((w: number) => (w / totalWeight) * amountLeft);
+   
+   // Cap at need, collect excess
+   let excess = 0;
+   let capped = false;
+   let result = Array(N).fill(0);
+   for (let i = 0; i < N; ++i) {
+      if (excluded.has(i) || needsLeft[i] <= 0) continue;
+      if (allocation[i] > needsLeft[i]) {
+         excess += allocation[i] - needsLeft[i];
+         allocation[i] = needsLeft[i];
+         capped = true;
+      }
+      result[i] = allocation[i];
+   }
+   
+   if (capped && excess > 0.0001) {
+      // Redistribute excess among not-yet-capped
+      const newNeeds = needsLeft.map((need: number, i: number) =>
+         excluded.has(i) || allocation[i] >= need ? 0 : need - allocation[i]
+      );
+      const newExcluded = new Set<number>(
+         Array.from(excluded).concat(
+            allocation.map((a: number, i: number) => (a >= needsLeft[i] ? i : null)).filter((i: number | null) => i !== null) as number[]
+         )
+      );
+      const recursive = distribute(excess, newNeeds, newExcluded);
+      for (let i = 0; i < N; ++i) result[i] += recursive[i];
+   }
+   return result;
+}
+```
+
+### How the Unequal Distribution Works
+
+#### 1. Hybrid Weighting System
+The algorithm uses a **bias factor** (0-1) to blend two distribution methods:
+- **Equal distribution**: `1 / N` (everyone gets the same)
+- **Proportional distribution**: `need / totalNeed` (those with higher needs get more)
+
+**Formula**: `weight = (1 - biasFactor) × equal + biasFactor × proportional`
+
+#### 2. Recursive Redistribution
+When a student reaches their goal, the algorithm:
+1. **Caps** their allocation at their need
+2. **Collects** the excess amount
+3. **Recursively redistributes** the excess to remaining students
+4. **Excludes** students who've reached their goal from further distribution
+
+#### 3. Key Features
+- **No waste**: All money is distributed (no student gets more than they need)
+- **Fair**: Students with higher needs get proportionally more (when bias > 0)
+- **Flexible**: Bias factor lets donors choose between equal vs. need-based distribution
+- **Recursive**: Handles complex scenarios where multiple students reach goals simultaneously
+
+#### 4. Example
+With $1000 donation and 3 students:
+- **Student A**: Needs $200 (20% of total need)
+- **Student B**: Needs $300 (30% of total need) 
+- **Student C**: Needs $500 (50% of total need)
+
+**Equal distribution**: $333 each
+**Biased distribution (bias=0.7)**: $200, $300, $500 (proportional to need)
+
+This ensures that students with higher fundraising needs receive more support while still maintaining fairness and preventing waste.
+
 ## Technology Stack
 
 ### Frontend
