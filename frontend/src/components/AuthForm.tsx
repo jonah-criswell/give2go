@@ -279,6 +279,7 @@ export const AuthForm = ({
          {!isLogin && (
             <div className="mt-6 text-center">
                <p className="text-xs text-gray-500 leading-relaxed max-w-md mx-auto">
+                  <span className="text-red-500 font-semibold">NOTE:</span>
                   In practice, registering would happen over at smapp.cru.org like normal, and after the student is accepted onto their mission, they would use their Okta credentials to authenticate on Give2Go, and data could/would be synced with smapp.cru.org, as it'd be the same account
                </p>
             </div>

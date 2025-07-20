@@ -115,13 +115,22 @@ export const DonatePage = ({ student, onBack, onDonationSuccess }: DonatePagePro
 
    return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-0 py-4">
-         {/* Back Button moved above the box */}
+         {/* Back Button */}
          <button
             className="mb-4 self-start text-gray-500 hover:text-blue-600 text-sm font-medium px-2 py-1 rounded transition-colors"
             onClick={() => navigate(-1)}
          >
             &lt; Back
          </button>
+
+         {/* Give2Go Logo */}
+         <div className="w-full max-w-4xl mb-6 text-center">
+            <img
+               src="/Give2Go_Logo_Design-removebg-preview.png"
+               alt="Give2Go Logo"
+               className="h-32 mx-auto mb-4"
+            />
+         </div>
          <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden relative">
             {/* Left: Student Info */}
             <div className="md:w-5/12 w-full bg-gradient-to-br from-blue-50 to-purple-50 flex flex-col justify-start p-0 md:p-0 border-b md:border-b-0 md:border-r border-gray-100 min-h-[500px]">

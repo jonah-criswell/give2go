@@ -210,6 +210,15 @@ export const DonateRandomPage = () => {
             &lt; Back
          </button>
 
+         {/* Give2Go Logo */}
+         <div className="w-full max-w-6xl mb-6 text-center">
+            <img
+               src="/Give2Go_Logo_Design-removebg-preview.png"
+               alt="Give2Go Logo"
+               className="h-32 mx-auto mb-6"
+            />
+         </div>
+
          {/* Title and Explanatory Text */}
          <div className="w-full max-w-6xl mb-6 text-center">
             <h2 className="text-7xl text-gray-900 mb-4 whitespace-nowrap">Donate to a Random Student</h2>

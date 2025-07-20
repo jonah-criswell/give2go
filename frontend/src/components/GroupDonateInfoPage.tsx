@@ -82,8 +82,17 @@ export const GroupDonateInfoPage = ({ currentStudent, onNavigate, onLogout, onHo
          </div>
 
          <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            {/* Give2Go Logo */}
             <div className="text-center mb-8">
-               <h1 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-4">
+               <img
+                  src="/Give2Go_Logo_Design-removebg-preview.png"
+                  alt="Give2Go Logo"
+                  className="h-32 mx-auto mb-6"
+               />
+            </div>
+
+            <div className="text-center mb-8">
+               <h1 className="text-7xl text-gray-900 mb-4 whitespace-nowrap">
                   Group Donations
                </h1>
                <p className="text-lg text-gray-600 mb-2">

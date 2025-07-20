@@ -175,14 +175,18 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                                  </div>
                               </div>
                               {/* Student Name and University below image */}
-                              <div className="w-full text-center mt-2 mb-1">
+                              <div className="w-full text-center mt-2 mb-1 min-h-[60px] flex flex-col justify-center">
                                  <div className="text-3xl md:text-4xl font-normal text-gray-900 truncate">{student.name}</div>
-                                 {student.headline && (
-                                    <div className="text-sm text-gray-500 font-normal mt-1 whitespace-pre-line break-words leading-snug" style={{ wordBreak: 'break-word', whiteSpace: 'pre-line' }}>
-                                       "{student.headline}"
-                                    </div>
-                                 )}
-                                 <div className="text-xs md:text-sm text-gray-500 mt-1 truncate">{student.university}</div>
+                                 <div className="min-h-[40px] flex items-center justify-center">
+                                    {student.headline ? (
+                                       <div className="text-sm text-gray-500 font-normal mt-1 whitespace-pre-line break-words leading-snug" style={{ wordBreak: 'break-word', whiteSpace: 'pre-line' }}>
+                                          "{student.headline}"
+                                       </div>
+                                    ) : (
+                                       <div className="text-sm text-gray-500 font-normal mt-1 opacity-0">Placeholder</div>
+                                    )}
+                                 </div>
+                                 <div className="text-xs md:text-sm text-gray-500 mt-1 truncate font-semibold">{student.university}</div>
                               </div>
 
                               {/* Trip Information */}
@@ -231,14 +235,16 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                               </div>
 
                               {/* Support Button */}
-                              <div className="p-4 pt-0">
-                                 <Link
-                                    to={`/donate/${student.id}`}
-                                    className="w-full block bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium text-center hover:bg-blue-700 transition-colors duration-200"
-                                 >
-                                    Support {student.name.split(' ')[0]}
-                                 </Link>
-                              </div>
+                              {percent < 100 && (
+                                 <div className="p-4 pt-0">
+                                    <Link
+                                       to={`/donate/${student.id}`}
+                                       className="w-full block bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium text-center hover:bg-blue-700 transition-colors duration-200"
+                                    >
+                                       Support {student.name.split(' ')[0]}
+                                    </Link>
+                                 </div>
+                              )}
                            </div>
                         );
                      })}
