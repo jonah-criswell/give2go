@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import type { Student } from '../types';
@@ -9,11 +9,20 @@ interface GroupDonateInfoPageProps {
    onNavigate: (page: 'index' | 'login' | 'register' | 'profile') => void;
    onLogout: () => void;
    onHomeClick?: () => void;
+   onRandomDonation?: () => void;
+   onGroupDonation?: () => void;
 }
 
-export const GroupDonateInfoPage = ({ currentStudent, onNavigate, onLogout, onHomeClick }: GroupDonateInfoPageProps) => {
+export const GroupDonateInfoPage = ({ currentStudent, onNavigate, onLogout, onHomeClick, onRandomDonation, onGroupDonation }: GroupDonateInfoPageProps) => {
    const navigate = useNavigate();
    const [showExample, setShowExample] = useState(false);
+   const [showBiasExample, setShowBiasExample] = useState(false);
+   const [selectedBias, setSelectedBias] = useState(0.7);
+
+   // Scroll to top when component mounts
+   useEffect(() => {
+      window.scrollTo(0, 0);
+   }, []);
 
    const StaticStudentCard = ({ name, goal, current, newBalance, received, needs, highlight }: {
       name: string;
@@ -60,7 +69,7 @@ export const GroupDonateInfoPage = ({ currentStudent, onNavigate, onLogout, onHo
 
    return (
       <div className="min-h-screen bg-gray-50">
-         <Navbar currentStudent={currentStudent} onNavigate={onNavigate} onLogout={onLogout} onHomeClick={onHomeClick} showCruLogo={false} />
+         <Navbar currentStudent={currentStudent} onNavigate={onNavigate} onLogout={onLogout} onHomeClick={onHomeClick} showCruLogo={false} onRandomDonation={onRandomDonation} onGroupDonation={onGroupDonation} />
 
          {/* Back Button */}
          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
@@ -68,7 +77,7 @@ export const GroupDonateInfoPage = ({ currentStudent, onNavigate, onLogout, onHo
                className="text-gray-500 hover:text-blue-600 text-sm font-medium px-2 py-1 rounded transition-colors"
                onClick={() => navigate(-1)}
             >
-               &larr; Back
+               &lt; Back
             </button>
          </div>
 
@@ -120,8 +129,7 @@ export const GroupDonateInfoPage = ({ currentStudent, onNavigate, onLogout, onHo
                         <div>
                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Smart Distribution</h3>
                            <p className="text-gray-600">
-                              Your donation is evenly divided among eligible students. If some students are close to their goal,
-                              excess funds are automatically redistributed to other students who still need support.
+                              Your donation gets divided up between multiple students, and you as the donor can configure how the funds are distributed. Whether you want funds to be distributed equally, or whether you want to skew the distribution to favor students falling behind, you can tailor the distribution to your liking.
                            </p>
                         </div>
                      </div>
@@ -148,7 +156,7 @@ export const GroupDonateInfoPage = ({ currentStudent, onNavigate, onLogout, onHo
                         aria-expanded={showExample}
                         aria-controls="example-scenario-content"
                      >
-                        <span className="mr-3">Example Scenario</span>
+                        <span className="mr-3">Equal Distribution Example</span>
                         <span className="text-sm text-gray-500 font-normal">(Click to expand)</span>
                         <svg
                            className={`w-6 h-6 transform transition-transform duration-200 ml-auto ${showExample ? 'rotate-90' : ''}`}
@@ -162,7 +170,7 @@ export const GroupDonateInfoPage = ({ currentStudent, onNavigate, onLogout, onHo
                      {showExample && (
                         <div id="example-scenario-content" className="space-y-6">
                            <div className="p-6 bg-gray-50 rounded-lg">
-                              <h3 className="text-lg font-semibold text-gray-900 mb-4">How the Distribution Works</h3>
+                              <h3 className="text-lg font-semibold text-gray-900 mb-4">How Equal Distribution Works</h3>
                               <div className="text-gray-700">
                                  <p className="mb-3">
                                     Let's say you donate <strong>$100</strong> to a group of <strong>4 students</strong>:
@@ -220,6 +228,130 @@ export const GroupDonateInfoPage = ({ currentStudent, onNavigate, onLogout, onHo
                      )}
                   </div>
 
+                  {/* Bias Factor Example - Collapsible */}
+                  <div className="mt-8">
+                     <button
+                        className="flex items-center w-full text-left text-2xl font-bold text-gray-900 mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 cursor-pointer"
+                        onClick={() => setShowBiasExample((prev) => !prev)}
+                        aria-expanded={showBiasExample}
+                        aria-controls="bias-example-scenario-content"
+                     >
+                        <span className="mr-3">Bias Factor Distribution Example</span>
+                        <span className="text-sm text-gray-500 font-normal">(Click to expand)</span>
+                        <svg
+                           className={`w-6 h-6 transform transition-transform duration-200 ml-auto ${showBiasExample ? 'rotate-90' : ''}`}
+                           fill="none"
+                           stroke="currentColor"
+                           viewBox="0 0 24 24"
+                        >
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                     </button>
+                     {showBiasExample && (
+                        <div id="bias-example-scenario-content" className="space-y-6">
+                           <div className="p-6 bg-gray-50 rounded-lg">
+                              <h3 className="text-lg font-semibold text-gray-900 mb-4">How Bias Factor Distribution Works</h3>
+                              <div className="text-gray-700">
+                                 <p className="mb-3">
+                                    With a <strong>$800 donation</strong> and <strong>3 students</strong> with different needs:
+                                 </p>
+                                 <div className="mb-3">
+                                    <p className="font-semibold text-gray-900 mb-2">Student Needs:</p>
+                                    <ul className="space-y-1 text-gray-700">
+                                       <li>• Student A: Needs $200 (20% of total need)</li>
+                                       <li>• Student B: Needs $300 (30% of total need)</li>
+                                       <li>• Student C: Needs $500 (50% of total need)</li>
+                                    </ul>
+                                 </div>
+                                 <div className="mb-3">
+                                    <p className="font-semibold text-gray-900 mb-2">Different Distribution Methods:</p>
+                                    <ul className="space-y-1 text-gray-700">
+                                       <li>• <strong>Equal (bias=0.0):</strong> $200, $300, $300 (A and B reach goals, C gets rest)</li>
+                                       <li>• <strong>Custom Skew (bias=0.3):</strong> $200, $264.77, $335.24 (A capped, B and C get rest proportionally)</li>
+                                       <li>• <strong>Custom Skew (bias=0.7):</strong> $192, $248, $360 (24%, 31%, 45%)</li>
+                                       <li>• <strong>Proportional (bias=1.0):</strong> $160, $240, $400 (20%, 30%, 50%)</li>
+                                    </ul>
+                                 </div>
+                                 <p className="mt-3 text-gray-700">
+                                    <span className="font-semibold text-gray-900">The bias factor:</span> A mathematical forumla that controls the balance between equal distribution and need-based proportional distribution. Higher bias values favor students with greater fundraising needs, while lower values ensure more equal treatment.
+                                 </p>
+                              </div>
+                           </div>
+                           {/* Visual Before/After Cards for Bias Example */}
+                           <div className="p-6 bg-gray-50 rounded-lg">
+                              <div className="mt-4">
+                                 {/* Bias Factor Selector */}
+                                 <div className="mb-6 text-center">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                       Choose Bias Factor to Visualize:
+                                    </label>
+                                    <div className="flex justify-center space-x-2">
+                                       {[0, 0.3, 0.7, 1].map((bias) => (
+                                          <button
+                                             key={bias}
+                                             onClick={() => setSelectedBias(bias)}
+                                             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${selectedBias === bias
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                                }`}
+                                          >
+                                             {bias === 0 ? 'Equal (0.0)' : bias === 1 ? 'Proportional (1.0)' : `Bias ${bias}`}
+                                          </button>
+                                       ))}
+                                    </div>
+                                 </div>
+
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {/* Before */}
+                                    <div>
+                                       <div className="text-center font-semibold text-gray-900 mb-2">Before Donation</div>
+                                       <div className="grid grid-cols-1 gap-4">
+                                          <StaticStudentCard name="A" goal={200} current={0} needs={200} />
+                                          <StaticStudentCard name="B" goal={300} current={0} needs={300} />
+                                          <StaticStudentCard name="C" goal={500} current={0} needs={500} />
+                                       </div>
+                                    </div>
+                                    {/* After - Dynamic based on selected bias */}
+                                    <div>
+                                       <div className="text-center font-semibold text-gray-900 mb-2">
+                                          After Group Donation (bias={selectedBias})
+                                       </div>
+                                       <div className="grid grid-cols-1 gap-4">
+                                          {(() => {
+                                             // Calculate amounts based on selected bias
+                                             let amounts = { A: 0, B: 0, C: 0 };
+
+                                             if (selectedBias === 0) {
+                                                // Equal distribution with redistribution
+                                                amounts = { A: 200, B: 300, C: 300 };
+                                             } else if (selectedBias === 1) {
+                                                // Pure proportional
+                                                amounts = { A: 160, B: 240, C: 400 };
+                                             } else if (selectedBias === 0.7) {
+                                                // Custom skew 0.7
+                                                amounts = { A: 192, B: 248, C: 360 };
+                                             } else if (selectedBias === 0.3) {
+                                                // Custom skew 0.3
+                                                amounts = { A: 200, B: 264.77, C: 335.24 };
+                                             }
+
+                                             return (
+                                                <>
+                                                   <StaticStudentCard name="A" goal={200} current={0} newBalance={amounts.A} received={amounts.A} highlight />
+                                                   <StaticStudentCard name="B" goal={300} current={0} newBalance={amounts.B} received={amounts.B} highlight />
+                                                   <StaticStudentCard name="C" goal={500} current={0} newBalance={amounts.C} received={amounts.C} highlight />
+                                                </>
+                                             );
+                                          })()}
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     )}
+                  </div>
+
                   {/* Key Benefits */}
                   <h2 className="text-2xl font-bold text-gray-900 mb-6 mt-12">Key Benefits</h2>
                   <div className="space-y-4">
@@ -241,8 +373,8 @@ export const GroupDonateInfoPage = ({ currentStudent, onNavigate, onLogout, onHo
                            </svg>
                         </div>
                         <div>
-                           <h3 className="text-lg font-semibold text-gray-900 mb-2">Smart Distribution</h3>
-                           <p className="text-gray-600">Funds are automatically redistributed to maximize impact</p>
+                           <h3 className="text-lg font-semibold text-gray-900 mb-2">Flexible Distribution</h3>
+                           <p className="text-gray-600">Funds are automatically redistributed according to your preferences</p>
                         </div>
                      </div>
                      <div className="flex items-start space-x-4">

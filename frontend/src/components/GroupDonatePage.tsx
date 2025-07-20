@@ -8,9 +8,11 @@ interface GroupDonatePageProps {
    onNavigate: (page: 'index' | 'login' | 'register' | 'profile') => void;
    onLogout: () => void;
    onHomeClick?: () => void;
+   onRandomDonation?: () => void;
+   onGroupDonation?: () => void;
 }
 
-export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeClick }: GroupDonatePageProps) => {
+export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeClick, onRandomDonation, onGroupDonation }: GroupDonatePageProps) => {
    const navigate = useNavigate();
    const [loading, setLoading] = useState(false);
    const [students, setStudents] = useState<Student[]>([]);
@@ -266,7 +268,7 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
 
    return (
       <div className="min-h-screen bg-gray-50">
-         <Navbar currentStudent={currentStudent} onNavigate={onNavigate} onLogout={onLogout} onHomeClick={onHomeClick} showCruLogo={true} />
+         <Navbar currentStudent={currentStudent} onNavigate={onNavigate} onLogout={onLogout} onHomeClick={onHomeClick} showCruLogo={true} onRandomDonation={onRandomDonation} onGroupDonation={onGroupDonation} />
 
          <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8">
@@ -440,7 +442,7 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
                   {/* Donation Amount */}
                   <div>
                      <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-                        Donation Amount ($) - Max: ${maxDistributableAmount.toFixed(2)}
+                        Donation Amount ($)
                      </label>
                      <input
                         type="number"
@@ -454,11 +456,6 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
                         placeholder={`Enter amount (max: $${maxDistributableAmount.toFixed(2)})`}
                      />
                      {errors.donationAmount && <p className="text-red-600 text-sm mt-1">{errors.donationAmount}</p>}
-                     {maxDistributableAmount > 0 && (
-                        <p className="text-gray-500 text-sm mt-1">
-                           This amount will be distributed evenly among {eligibleStudents.length} students
-                        </p>
-                     )}
                   </div>
 
                   {/* Donation Preview */}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Navbar } from './Navbar';
 import type { Student, ProfileFormData, Donation } from '../types';
 
 interface ProfileProps {
@@ -160,20 +161,72 @@ export const Profile = ({ currentStudent, setCurrentStudent, onNavigate }: Profi
 
    return (
       <div className="min-h-screen bg-gray-50">
-         {/* Back Button */}
-         <div className="absolute top-6 left-6">
-            <button
-               onClick={() => onNavigate('index')}
-               className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
-            >
-               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-               </svg>
-               Back to Students
-            </button>
-         </div>
+         <Navbar currentStudent={currentStudent} onNavigate={onNavigate} onLogout={() => onNavigate('login')} showCruLogo={false} />
 
          <div className="max-w-4xl mx-auto pt-20 pb-8 px-4">
+            {/* Prominent Progress Bar */}
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
+               <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-16 text-white text-center">
+                  <h1 className="text-4xl font-bold mb-6">Fundraising Progress</h1>
+
+                  {/* Progress Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                     <div>
+                        <div className="text-5xl font-bold text-white mb-2">{currentStudent.formatted_balance}</div>
+                        <div className="text-blue-100 text-lg">Raised</div>
+                     </div>
+                     <div>
+                        <div className="text-5xl font-bold text-white mb-2">
+                           ${currentStudent.trip?.goal_amount?.toLocaleString() || '5,000'}
+                        </div>
+                        <div className="text-blue-100 text-lg">Goal</div>
+                     </div>
+                     <div>
+                        <div className="text-5xl font-bold text-white mb-2">
+                           {Math.min(Math.floor((parseFloat(currentStudent.balance.toString()) / (currentStudent.trip?.goal_amount || 5000)) * 100), 100)}%
+                        </div>
+                        <div className="text-blue-100 text-lg">Complete</div>
+                     </div>
+                  </div>
+
+                  {/* Large Progress Bar */}
+                  <div className="w-full max-w-4xl mx-auto">
+                     <div className="bg-white/20 rounded-full h-8 mb-4 overflow-hidden">
+                        <div
+                           className="bg-gradient-to-r from-green-400 to-green-600 h-8 rounded-full transition-all duration-1000 ease-out flex items-center justify-center"
+                           style={{
+                              width: `${Math.min((parseFloat(currentStudent.balance.toString()) / (currentStudent.trip?.goal_amount || 5000)) * 100, 100)}%`
+                           }}
+                        >
+                           <span className="text-white font-bold text-sm">
+                              {Math.min(Math.floor((parseFloat(currentStudent.balance.toString()) / (currentStudent.trip?.goal_amount || 5000)) * 100), 100)}%
+                           </span>
+                        </div>
+                     </div>
+
+                     {/* Progress Text */}
+                     <div className="text-blue-100 text-lg">
+                        {(() => {
+                           const percent = Math.min((parseFloat(currentStudent.balance.toString()) / (currentStudent.trip?.goal_amount || 5000)) * 100, 100);
+                           const remaining = (currentStudent.trip?.goal_amount || 5000) - parseFloat(currentStudent.balance.toString());
+
+                           if (percent >= 100) {
+                              return "🎉 Goal reached! Thank you for your support!";
+                           } else if (percent >= 75) {
+                              return `Almost there! Just $${remaining.toFixed(0)} more needed to reach the goal.`;
+                           } else if (percent >= 50) {
+                              return `Halfway there! $${remaining.toFixed(0)} more needed to reach the goal.`;
+                           } else if (percent >= 25) {
+                              return `Great start! $${remaining.toFixed(0)} more needed to reach the goal.`;
+                           } else {
+                              return `Getting started! $${remaining.toFixed(0)} more needed to reach the goal.`;
+                           }
+                        })()}
+                     </div>
+                  </div>
+               </div>
+            </div>
+
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                {/* Header */}
                <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-12 text-white">
@@ -242,8 +295,19 @@ export const Profile = ({ currentStudent, setCurrentStudent, onNavigate }: Profi
                               <p className="text-gray-800">{currentStudent.year}</p>
                            </div>
                            <div>
-                              <label className="block text-sm font-medium text-gray-600">Funds Raised</label>
-                              <p className="text-2xl font-bold text-green-600">{currentStudent.formatted_balance}</p>
+                              <label className="block text-sm font-medium text-gray-600">Mission Trip</label>
+                              <p className="text-gray-800">
+                                 {currentStudent.trip ? (
+                                    <>
+                                       {currentStudent.trip.name}
+                                       <span className="text-gray-500 text-sm block">
+                                          {currentStudent.trip.location_city}, {currentStudent.trip.location_country}
+                                       </span>
+                                    </>
+                                 ) : (
+                                    <span className="text-gray-500 italic">No trip assigned</span>
+                                 )}
+                              </p>
                            </div>
                         </div>
                      </div>
@@ -346,6 +410,15 @@ export const Profile = ({ currentStudent, setCurrentStudent, onNavigate }: Profi
                            </form>
                         ) : (
                            <div className="space-y-4">
+                              {currentStudent.headline ? (
+                                 <div>
+                                    <label className="block text-sm font-medium text-gray-600 mb-2">Headline</label>
+                                    <p className="text-gray-800 italic">"{currentStudent.headline}"</p>
+                                 </div>
+                              ) : (
+                                 <div className="text-gray-500 italic">No headline added yet.</div>
+                              )}
+
                               {currentStudent.bio ? (
                                  <div>
                                     <label className="block text-sm font-medium text-gray-600 mb-2">Bio</label>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Student } from '../types';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { StudentSearch } from './StudentSearch';
 
 interface StudentListProps {
@@ -15,6 +15,7 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
    const [searchParams] = useSearchParams();
    const [currentPage, setCurrentPage] = useState(1);
    const studentsPerPage = 16;
+   const navigate = useNavigate();
 
    // Update filtered students when the original students list changes
    useEffect(() => {
@@ -153,7 +154,7 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                         return (
                            <div key={student.id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
                               {/* Student Profile Picture Header */}
-                              <div className="w-full aspect-square bg-gradient-to-br from-blue-500 to-purple-600 relative overflow-hidden">
+                              <div className="w-full aspect-square bg-gray-300 relative overflow-hidden">
                                  {student.profile_picture_url ? (
                                     <img
                                        src={student.profile_picture_url}
@@ -263,8 +264,8 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                               key={page}
                               onClick={() => handlePageChange(page)}
                               className={`px-3 py-2 text-sm font-medium rounded-md ${currentPage === page
-                                    ? 'bg-blue-600 text-white'
-                                    : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                                 ? 'bg-blue-600 text-white'
+                                 : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
                                  }`}
                            >
                               {page}
@@ -309,13 +310,13 @@ export const StudentList = ({ students, loading, error }: StudentListProps) => {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                            <button
                               className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 text-lg"
-                              onClick={() => window.location.href = '/donate/random'}
+                              onClick={() => navigate('/donate/random')}
                            >
                               Donate to a Random Student
                            </button>
                            <button
                               className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 text-lg"
-                              onClick={() => window.location.href = '/group-donate-info'}
+                              onClick={() => navigate('/group-donate-info')}
                            >
                               Donate to Multiple Students
                            </button>

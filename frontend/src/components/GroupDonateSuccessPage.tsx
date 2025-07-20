@@ -9,9 +9,11 @@ interface GroupDonateSuccessPageProps {
    onLogout: () => void;
    onHomeClick?: () => void;
    refetchStudents: () => Promise<void>;
+   onRandomDonation?: () => void;
+   onGroupDonation?: () => void;
 }
 
-export const GroupDonateSuccessPage = ({ currentStudent, onNavigate, onLogout, onHomeClick, refetchStudents }: GroupDonateSuccessPageProps) => {
+export const GroupDonateSuccessPage = ({ currentStudent, onNavigate, onLogout, onHomeClick, refetchStudents, onRandomDonation, onGroupDonation }: GroupDonateSuccessPageProps) => {
    const navigate = useNavigate();
    const location = useLocation();
    const { donationAmount, studentCount, averageAmount } = location.state || {};
@@ -21,14 +23,12 @@ export const GroupDonateSuccessPage = ({ currentStudent, onNavigate, onLogout, o
    const avgAmountDisplay = !isNaN(avgAmountNum) ? avgAmountNum.toFixed(2) : '0.00';
    const donationAmountDisplay = typeof donationAmount === 'number' ? donationAmount.toLocaleString() : Number(donationAmount).toLocaleString();
 
-   // Refetch students on mount
-   useEffect(() => {
-      refetchStudents();
-   }, [refetchStudents]);
+   // Note: Removed automatic refetch to prevent unnecessary shuffling
+   // Students will be refetched when user navigates to other pages
 
    return (
       <div className="min-h-screen bg-gray-50">
-         <Navbar currentStudent={currentStudent} onNavigate={onNavigate} onLogout={onLogout} onHomeClick={onHomeClick} showCruLogo={true} />
+         <Navbar currentStudent={currentStudent} onNavigate={onNavigate} onLogout={onLogout} onHomeClick={onHomeClick} showCruLogo={true} onRandomDonation={onRandomDonation} onGroupDonation={onGroupDonation} />
 
          <div className="max-w-2xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
             <div className="text-center">

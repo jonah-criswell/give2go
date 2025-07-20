@@ -207,12 +207,22 @@ export const DonateRandomPage = () => {
             className="mb-4 self-start text-gray-500 hover:text-blue-600 text-sm font-medium px-2 py-1 rounded transition-colors"
             onClick={() => navigate(-1)}
          >
-            &larr; Back
+            &lt; Back
          </button>
+
+         {/* Title and Explanatory Text */}
+         <div className="w-full max-w-6xl mb-6 text-center">
+            <h2 className="text-7xl text-gray-900 mb-4 whitespace-nowrap">Donate to a Random Student</h2>
+            <div className="max-w-2xl mx-auto">
+               <p className="text-gray-700 text-sm leading-relaxed">
+                  We get it, there are a lot of different students that need support, how do you pick just one? Let us choose for you: we will make sure your donation is given to a student where their balance would exceed their goal. If you are passionate about a specific trip or university, your random student can be from that trip or university! Bless a complete stranger today with a small gift, and heaven will rejoice.
+               </p>
+            </div>
+         </div>
+
          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden relative p-8">
-            <h2 className="text-2xl font-bold text-center mb-4">Donate to a Random Student</h2>
             <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-center">
-               <label className="font-medium text-gray-700">Choose Randomization:</label>
+               <label className="font-medium text-gray-700">Choose Student:</label>
                <select
                   className="border border-gray-300 rounded-md px-3 py-2"
                   value={filterType}
@@ -340,10 +350,17 @@ export const DonateRandomPage = () => {
                {success && <div className="text-green-600 text-sm text-center">{success}</div>}
                <button
                   type="submit"
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition-colors duration-200 disabled:opacity-60"
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition-colors duration-200 disabled:opacity-60 mb-3"
                   disabled={loading || !randomStudent}
                >
                   {loading ? 'Processing...' : 'Donate to a Random Student'}
+               </button>
+               <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="w-full bg-gray-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-gray-600 transition-colors duration-200"
+               >
+                  Cancel
                </button>
             </form>
             <div className="w-full max-w-2xl mx-auto text-center mt-6 mb-2">

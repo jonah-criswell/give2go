@@ -9,6 +9,8 @@ interface DonatePageProps {
 }
 
 export const DonatePage = ({ student, onBack, onDonationSuccess }: DonatePageProps) => {
+   const navigate = useNavigate();
+
    // Calculate max donation (goal - balance, at least $0.01)
    const goal = student.trip?.goal_amount || 5000;
    const balance = Number(student.balance) || 0;
@@ -22,15 +24,8 @@ export const DonatePage = ({ student, onBack, onDonationSuccess }: DonatePagePro
    const [phone, setPhone] = useState('');
    const [note, setNote] = useState('');
    const [error, setError] = useState('');
-   const [success, setSuccess] = useState('');
    const [loading, setLoading] = useState(false);
    const [localBalance, setLocalBalance] = useState(Number(student.balance) || 0);
-
-   const redirectToIndex = () => {
-      if (typeof window !== 'undefined') {
-         window.location.href = '/';
-      }
-   };
 
    // Sync slider and input
    const handleSliderChange = (val: string) => {
@@ -59,7 +54,6 @@ export const DonatePage = ({ student, onBack, onDonationSuccess }: DonatePagePro
    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       setError('');
-      setSuccess('');
       if (!amount || isNaN(amt) || amt < 1 || amt > maxDonation) {
          setError(`Please enter a valid donation amount between $1 and $${maxDonation.toFixed(2)}.`);
          return;
@@ -89,20 +83,28 @@ export const DonatePage = ({ student, onBack, onDonationSuccess }: DonatePagePro
             console.error('Donation error response:', data);
             setError(data.errors?.join(', ') || 'Failed to submit donation.');
          } else {
-            setSuccess('Thank you for your support!');
-            setAmount('');
-            setSliderAmount('1.00');
-            setName('');
-            setEmail('');
-            setPhone('');
-            setNote('');
-            // Update local balance for immediate UI feedback
-            setLocalBalance(prev => Math.min(prev + amt, goal));
+            // Calculate the values for the thank you page
+            const oldBalance = Number(student.balance) || 0;
+            const newBalance = Math.min(oldBalance + amt, goal);
+            const oldPercent = Math.min((oldBalance / goal) * 100, 100);
+            const newPercent = Math.min((newBalance / goal) * 100, 100);
+
+            // Navigate to thank you page with all the data
+            navigate('/donate/thank-you', {
+               state: {
+                  student,
+                  donationAmount: amt,
+                  oldBalance,
+                  newBalance,
+                  oldPercent,
+                  newPercent
+               }
+            });
+
             // Trigger students refresh
             if (onDonationSuccess) {
                onDonationSuccess();
             }
-            setTimeout(redirectToIndex, 1200);
          }
       } catch (err) {
          setError('Network error. Please try again.');
@@ -118,7 +120,7 @@ export const DonatePage = ({ student, onBack, onDonationSuccess }: DonatePagePro
             className="mb-4 self-start text-gray-500 hover:text-blue-600 text-sm font-medium px-2 py-1 rounded transition-colors"
             onClick={() => navigate(-1)}
          >
-            &larr; Back
+            &lt; Back
          </button>
          <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden relative">
             {/* Left: Student Info */}
@@ -279,13 +281,19 @@ export const DonatePage = ({ student, onBack, onDonationSuccess }: DonatePagePro
                      <div className="text-xs text-gray-400 text-right">{note.length}/300</div>
                   </div>
                   {error && <div className="text-red-600 text-sm text-center">{error}</div>}
-                  {success && <div className="text-green-600 text-sm text-center">{success}</div>}
                   <button
                      type="submit"
-                     className="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition-colors duration-200 disabled:opacity-60"
+                     className="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition-colors duration-200 disabled:opacity-60 mb-3"
                      disabled={loading}
                   >
                      {loading ? 'Processing...' : `Donate to ${student.name.split(' ')[0]}`}
+                  </button>
+                  <button
+                     type="button"
+                     onClick={() => navigate(-1)}
+                     className="w-full bg-gray-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-gray-600 transition-colors duration-200"
+                  >
+                     Cancel
                   </button>
                </form>
             </div>

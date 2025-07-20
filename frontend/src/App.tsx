@@ -15,6 +15,7 @@ import { ComingSoonPage } from "./components/ComingSoonPage";
 import { GroupDonatePage } from "./components/GroupDonatePage";
 import { GroupDonateSuccessPage } from "./components/GroupDonateSuccessPage";
 import { GroupDonateInfoPage } from "./components/GroupDonateInfoPage";
+import { DonateThankYouPage } from "./components/DonateThankYouPage";
 import type { Student } from "./types";
 
 
@@ -66,7 +67,7 @@ function App() {
     const navigate = useNavigate();
     const location = useLocation();
     const handleNavbarNavigate = (page: 'index' | 'login' | 'register' | 'profile') => {
-      if (page === 'index') navigate('/');
+      if (page === 'index') navigate('/students');
       else if (page === 'login') navigate('/login', { state: { from: location } });
       else if (page === 'register') navigate('/register', { state: { from: location } });
       else if (page === 'profile') navigate('/profile');
@@ -77,6 +78,8 @@ function App() {
         onNavigate={handleNavbarNavigate}
         onLogout={handleLogout}
         onHomeClick={() => navigate('/')}
+        onRandomDonation={() => navigate('/donate/random')}
+        onGroupDonation={() => navigate('/group-donate-info')}
       />
     );
   }
@@ -93,7 +96,7 @@ function App() {
     };
     return (
       <>
-        <Navbar currentStudent={currentStudent} onNavigate={handleNavbarNavigate} onLogout={handleLogout} onHomeClick={() => navigate('/')} />
+        <Navbar currentStudent={currentStudent} onNavigate={handleNavbarNavigate} onLogout={handleLogout} onHomeClick={() => navigate('/')} onRandomDonation={() => navigate('/donate/random')} onGroupDonation={() => navigate('/group-donate-info')} />
         <StudentList
           students={students}
           loading={studentsLoading}
@@ -171,6 +174,8 @@ function App() {
         onNavigate={handleNavbarNavigate}
         onLogout={handleLogout}
         onHomeClick={() => navigate('/')}
+        onRandomDonation={() => navigate('/donate/random')}
+        onGroupDonation={() => navigate('/group-donate-info')}
       />
     );
   }
@@ -191,6 +196,8 @@ function App() {
         onNavigate={handleNavbarNavigate}
         onLogout={handleLogout}
         onHomeClick={() => navigate('/')}
+        onRandomDonation={() => navigate('/donate/random')}
+        onGroupDonation={() => navigate('/group-donate-info')}
       />
     );
   }
@@ -212,6 +219,30 @@ function App() {
         onLogout={handleLogout}
         onHomeClick={() => navigate('/')}
         refetchStudents={refetchStudents}
+        onRandomDonation={() => navigate('/donate/random')}
+        onGroupDonation={() => navigate('/group-donate-info')}
+      />
+    );
+  }
+
+  // Wrapper for donate thank you page to provide navigation handler
+  function DonateThankYouPageWrapper() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const handleNavbarNavigate = (page: 'index' | 'login' | 'register' | 'profile') => {
+      if (page === 'index') navigate('/students');
+      else if (page === 'login') navigate('/login', { state: { from: location } });
+      else if (page === 'register') navigate('/register', { state: { from: location } });
+      else if (page === 'profile') navigate('/profile');
+    };
+    return (
+      <DonateThankYouPage
+        currentStudent={currentStudent}
+        onNavigate={handleNavbarNavigate}
+        onLogout={handleLogout}
+        onHomeClick={() => navigate('/')}
+        onRandomDonation={() => navigate('/donate/random')}
+        onGroupDonation={() => navigate('/group-donate-info')}
       />
     );
   }
@@ -227,6 +258,7 @@ function App() {
         <Route path="/donate/random" element={<DonateRandomPage />} />
         <Route path="/donate/reveal/:studentId" element={<DonateRevealPage onStudentsUpdate={refetchStudents} />} />
         <Route path="/donate/:studentId" element={<DonatePageWrapper />} />
+        <Route path="/donate/thank-you" element={<DonateThankYouPageWrapper />} />
         <Route path="/group-donate" element={<GroupDonatePageWrapper />} />
         <Route path="/group-donate/success" element={<GroupDonateSuccessPageWrapper />} />
         <Route path="/group-donate-info" element={<GroupDonateInfoPageWrapper />} />

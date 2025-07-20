@@ -8,9 +8,11 @@ interface LandingPageProps {
    onNavigate: (page: 'index' | 'login' | 'register' | 'profile') => void;
    onLogout: () => void;
    onHomeClick?: () => void;
+   onRandomDonation?: () => void;
+   onGroupDonation?: () => void;
 }
 
-export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick }: LandingPageProps) => {
+export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick, onRandomDonation, onGroupDonation }: LandingPageProps) => {
    const navigate = useNavigate();
    const [featuredStudents, setFeaturedStudents] = useState<Student[]>([]);
    const [loading, setLoading] = useState(false);
@@ -19,6 +21,11 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
    const [selectedTrip, setSelectedTrip] = useState('');
    const [universities, setUniversities] = useState<string[]>([]);
    const [trips, setTrips] = useState<string[]>([]);
+
+   // Scroll to top when component mounts
+   useEffect(() => {
+      window.scrollTo(0, 0);
+   }, []);
 
    // Fetch and select featured students
    useEffect(() => {
@@ -117,7 +124,7 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
 
    return (
       <div className="min-h-screen">
-         <Navbar currentStudent={currentStudent} onNavigate={onNavigate} onLogout={onLogout} onHomeClick={onHomeClick} showCruLogo={true} />
+         <Navbar currentStudent={currentStudent} onNavigate={onNavigate} onLogout={onLogout} onHomeClick={onHomeClick} showCruLogo={true} onRandomDonation={onRandomDonation} onGroupDonation={onGroupDonation} />
          {/* Hero Section */}
          <div className="relative overflow-hidden bg-gray-50" style={{
             backgroundImage: 'url(/another-wonderful-sunset-sky.png)',
@@ -376,7 +383,7 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
                         return (
                            <div key={student.id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
                               {/* Student Profile Picture Header */}
-                              <div className="w-full aspect-square bg-gradient-to-br from-blue-500 to-purple-600 relative overflow-hidden">
+                              <div className="w-full aspect-square bg-gray-300 relative overflow-hidden">
                                  {student.profile_picture_url ? (
                                     <img
                                        src={student.profile_picture_url}
@@ -690,8 +697,13 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
          </div>
 
          {/* Stats Section */}
-         <div className="py-16 bg-blue-600">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+         <div className="py-16 relative overflow-hidden">
+            <div
+               className="absolute inset-0 bg-cover bg-center"
+               style={{ backgroundImage: 'url(/48_backpack-a276a7d04730ffe72d53c7be1836b47fa0c30e516ef3c0b74be0e7b9ded41bfe.jpg)' }}
+            />
+            <div className="absolute inset-0 bg-blue-600/50" />
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                <div className="text-center mb-12">
                   <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
                      Making a Difference Together

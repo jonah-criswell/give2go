@@ -192,15 +192,17 @@ When a student reaches their goal, the algorithm:
 - **Recursive**: Handles complex scenarios where multiple students reach goals simultaneously
 
 #### 4. Example
-With $1000 donation and 3 students:
+With $800 donation and 3 students:
 - **Student A**: Needs $200 (20% of total need)
 - **Student B**: Needs $300 (30% of total need) 
 - **Student C**: Needs $500 (50% of total need)
 
-**Equal distribution**: $333 each
-**Biased distribution (bias=0.7)**: $200, $300, $500 (proportional to need)
+**Equal distribution (bias=0.0)**: $200, $300, $300 (after redistribution; A and B reach their goals, C gets the rest)
+**Pure proportional (bias=1.0)**: $160, $240, $400 (20%, 30%, 50%)
+**Custom Skew (bias=0.7, less equal, more need-based)**: $192, $248, $360 (24%, 31%, 45%)
+**Custom Skew (bias=0.3, more equal, less need-based)**: $200, $264.77, $335.24 (A capped, B and C get the rest proportionally)
 
-This ensures that students with higher fundraising needs receive more support while still maintaining fairness and preventing waste.
+This ensures that students with higher fundraising needs receive more support while still maintaining fairness and preventing excess funds going to students who have already reached their goal.
 
 ## Technology Stack
 
