@@ -9,7 +9,7 @@ export const useStudents = () => {
    const fetchStudents = async () => {
       setLoading(true);
       try {
-         const response = await fetch('/api/v1/students');
+         const response = await fetch('/api/v1/students?random=true');
          if (response.ok) {
             const data = await response.json();
             setStudents(data);

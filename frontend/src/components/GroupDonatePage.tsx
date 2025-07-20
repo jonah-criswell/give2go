@@ -25,6 +25,8 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
    const [donorPhone, setDonorPhone] = useState('');
    const [note, setNote] = useState('');
    const [errors, setErrors] = useState<Record<string, string>>({});
+   const [distributionType, setDistributionType] = useState<'equal' | 'biased'>('equal');
+   const [biasFactor, setBiasFactor] = useState(0.5);
 
    // Fetch all students to get universities and trips
    useEffect(() => {
@@ -176,30 +178,87 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
       if (!donationAmount || eligibleStudents.length === 0) return null;
 
       const amount = parseFloat(donationAmount);
-      const baseAmountPerStudent = amount / eligibleStudents.length;
-
-      // Calculate how much each student would receive
-      const distribution = eligibleStudents.map(student => {
+      const needs = eligibleStudents.map(student => {
          const goalAmount = student.trip?.goal_amount || 5000;
-         const remaining = Math.max(0, goalAmount - student.balance);
-         const wouldReceive = Math.min(baseAmountPerStudent, remaining);
-
-         return {
-            student,
-            wouldReceive,
-            remaining,
-            goalAmount
-         };
+         return Math.max(0, goalAmount - student.balance);
       });
+      const totalNeed = needs.reduce((a, b) => a + b, 0);
+      const N = eligibleStudents.length;
 
+      // Helper for recursive redistribution
+      function distribute(amountLeft: number, needsLeft: number[], excluded: Set<number> = new Set()): number[] {
+         // Calculate weights for students not excluded
+         let weights = needsLeft.map((need: number, i: number) => {
+            if (excluded.has(i) || need <= 0) return 0;
+            const equal = 1 / (N - excluded.size);
+            const proportional = totalNeed > 0 ? need / totalNeed : equal;
+            return (1 - biasFactor) * equal + biasFactor * proportional;
+         });
+         const totalWeight = weights.reduce((a: number, b: number) => a + b, 0);
+         if (totalWeight === 0) return Array(N).fill(0);
+         // Initial allocation
+         let allocation = weights.map((w: number) => (w / totalWeight) * amountLeft);
+         // Cap at need, collect excess
+         let excess = 0;
+         let capped = false;
+         let result = Array(N).fill(0);
+         for (let i = 0; i < N; ++i) {
+            if (excluded.has(i) || needsLeft[i] <= 0) continue;
+            if (allocation[i] > needsLeft[i]) {
+               excess += allocation[i] - needsLeft[i];
+               allocation[i] = needsLeft[i];
+               capped = true;
+            }
+            result[i] = allocation[i];
+         }
+         if (capped && excess > 0.0001) {
+            // Redistribute excess among not-yet-capped
+            const newNeeds = needsLeft.map((need: number, i: number) =>
+               excluded.has(i) || allocation[i] >= need ? 0 : need - allocation[i]
+            );
+            const newExcluded = new Set<number>(
+               Array.from(excluded).concat(
+                  allocation.map((a: number, i: number) => (a >= needsLeft[i] ? i : null)).filter((i: number | null) => i !== null) as number[]
+               )
+            );
+            const recursive = distribute(excess, newNeeds, newExcluded);
+            for (let i = 0; i < N; ++i) result[i] += recursive[i];
+         }
+         return result;
+      }
+
+      let distribution;
+      if (distributionType === 'equal') {
+         // Equal distribution (legacy)
+         const baseAmountPerStudent = amount / N;
+         distribution = eligibleStudents.map((student, i) => {
+            const wouldReceive = Math.min(baseAmountPerStudent, needs[i]);
+            return {
+               student,
+               wouldReceive,
+               remaining: needs[i],
+               goalAmount: student.trip?.goal_amount || 5000
+            };
+         });
+      } else {
+         // Biased distribution
+         const allocations = distribute(amount, needs);
+         distribution = eligibleStudents.map((student, i) => {
+            return {
+               student,
+               wouldReceive: allocations[i],
+               remaining: needs[i],
+               goalAmount: student.trip?.goal_amount || 5000
+            };
+         });
+      }
       const totalDistributed = distribution.reduce((sum, d) => sum + d.wouldReceive, 0);
       const excess = amount - totalDistributed;
-
       return {
          distribution,
          totalDistributed,
-         excess,
-         baseAmountPerStudent
+         baseAmountPerStudent: amount / N,
+         excess
       };
    };
 
@@ -323,6 +382,60 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
                         </p>
                      )}
                   </div>
+
+                  {/* Distribution Type Toggle */}
+                  <div>
+                     <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Distribution Type
+                     </label>
+                     <div className="flex items-center space-x-6">
+                        <label className="flex items-center">
+                           <input
+                              type="radio"
+                              name="distributionType"
+                              value="equal"
+                              checked={distributionType === 'equal'}
+                              onChange={() => setDistributionType('equal')}
+                              className="mr-2"
+                           />
+                           <span className="text-gray-700">Equal Distribution</span>
+                        </label>
+                        <label className="flex items-center">
+                           <input
+                              type="radio"
+                              name="distributionType"
+                              value="biased"
+                              checked={distributionType === 'biased'}
+                              onChange={() => setDistributionType('biased')}
+                              className="mr-2"
+                           />
+                           <span className="text-gray-700">Biased (Need-Based) Distribution</span>
+                        </label>
+                     </div>
+                  </div>
+
+                  {/* Bias Factor Slider */}
+                  {distributionType === 'biased' && (
+                     <div className="mt-2">
+                        <label htmlFor="biasFactor" className="block text-sm font-medium text-gray-700 mb-1">
+                           Bias Factor: <span className="font-semibold text-blue-700">{biasFactor}</span>
+                        </label>
+                        <input
+                           type="range"
+                           id="biasFactor"
+                           min={0}
+                           max={1}
+                           step={0.01}
+                           value={biasFactor}
+                           onChange={e => setBiasFactor(Number(e.target.value))}
+                           className="w-full"
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                           <span>Equal</span>
+                           <span>Proportional to Need</span>
+                        </div>
+                     </div>
+                  )}
 
                   {/* Donation Amount */}
                   <div>

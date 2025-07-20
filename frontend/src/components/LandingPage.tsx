@@ -271,7 +271,7 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
                      </div>
                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Live out the Great Commission</h3>
                      <p className="text-gray-600">
-                        Connect with the next generation of the Body of Christ by equipping them with the resources they need to live out the Great Commission and make a lasting impact internation
+                        Connect with the next generation of the Body of Christ by equipping them with the resources they need to live out the Great Commission and make a lasting impact internationally
                      </p>
                   </div>
                </div>

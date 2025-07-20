@@ -13,9 +13,7 @@ export const StudentSearch = ({ students, onFilteredStudentsChange }: StudentSea
    const [selectedUniversity, setSelectedUniversity] = useState('');
    const [selectedTrip, setSelectedTrip] = useState('');
    const [progressFilter, setProgressFilter] = useState('');
-   const [sortBy, setSortBy] = useState('name');
-   // Add a random seed that changes on mount and when search/filter criteria change
-   const [randomSeed, setRandomSeed] = useState(() => Math.random());
+   const [sortBy, setSortBy] = useState('random');
 
    // Initialize search state from URL parameters
    useEffect(() => {
@@ -26,13 +24,7 @@ export const StudentSearch = ({ students, onFilteredStudentsChange }: StudentSea
       setSearchTerm(urlSearch);
       setSelectedUniversity(urlUniversity);
       setSelectedTrip(urlTrip);
-      setRandomSeed(Math.random()); // Change the seed when search params change
    }, [searchParams]);
-
-   // Also update the seed when students, progressFilter, or sortBy change (for full re-randomization)
-   useEffect(() => {
-      setRandomSeed(Math.random());
-   }, [students, progressFilter, sortBy]);
 
    // Get unique universities and trips for filter options
    const universities = useMemo(() => {
@@ -45,8 +37,9 @@ export const StudentSearch = ({ students, onFilteredStudentsChange }: StudentSea
       return unique.sort();
    }, [students]);
 
-   // Filter and sort students
-   const filteredAndSortedStudents = useMemo(() => {
+   // Simple filtering and sorting without memoization
+   const filteredAndSortedStudents = (() => {
+      // Filter students
       let filtered = students.filter(student => {
          // Name search
          if (searchTerm && !student.name.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -91,47 +84,34 @@ export const StudentSearch = ({ students, onFilteredStudentsChange }: StudentSea
          return true;
       });
 
-      // Always randomize order (but 100%+ last) if sortBy is 'name', regardless of filters
-      if (sortBy === 'name') {
-         // Separate students at 100%+
-         const notComplete = filtered.filter(s => {
-            const goal = s.trip?.goal_amount || 0;
-            return !(goal > 0 && s.balance >= goal);
-         });
-         const complete = filtered.filter(s => {
-            const goal = s.trip?.goal_amount || 0;
-            return goal > 0 && s.balance >= goal;
-         });
-         // Shuffle notComplete using the randomSeed
-         function seededRandom(seed: number) {
-            var x = Math.sin(seed++) * 10000;
-            return x - Math.floor(x);
-         }
-         for (let i = notComplete.length - 1; i > 0; i--) {
-            const j = Math.floor(seededRandom(randomSeed * 10000 + i) * (i + 1));
-            [notComplete[i], notComplete[j]] = [notComplete[j], notComplete[i]];
-         }
-         return [...notComplete, ...complete];
+      // Sort students
+      if (sortBy === 'random') {
+         // For random, just return the filtered list as-is (backend already randomized it)
+         return filtered;
       }
 
-      // Otherwise, sort by selected option
-      filtered.sort((a, b) => {
-         switch (sortBy) {
-            case 'progress':
-               const progressA = a.trip?.goal_amount ? (a.balance / a.trip.goal_amount) * 100 : 0;
-               const progressB = b.trip?.goal_amount ? (b.balance / b.trip.goal_amount) * 100 : 0;
-               return progressA - progressB;
-            case 'goal':
-               const goalA = a.trip?.goal_amount || 0;
-               const goalB = b.trip?.goal_amount || 0;
-               return goalA - goalB;
-            default:
-               return 0;
-         }
-      });
+      if (sortBy === 'name') {
+         return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+      }
+
+      if (sortBy === 'progress') {
+         return [...filtered].sort((a, b) => {
+            const progressA = a.trip?.goal_amount ? (a.balance / a.trip.goal_amount) * 100 : 0;
+            const progressB = b.trip?.goal_amount ? (b.balance / b.trip.goal_amount) * 100 : 0;
+            return progressA - progressB;
+         });
+      }
+
+      if (sortBy === 'goal') {
+         return [...filtered].sort((a, b) => {
+            const goalA = a.trip?.goal_amount || 0;
+            const goalB = b.trip?.goal_amount || 0;
+            return goalA - goalB;
+         });
+      }
 
       return filtered;
-   }, [students, searchTerm, selectedUniversity, selectedTrip, progressFilter, sortBy, randomSeed]);
+   })();
 
    // Update parent component when filtered results change
    React.useEffect(() => {
@@ -143,10 +123,10 @@ export const StudentSearch = ({ students, onFilteredStudentsChange }: StudentSea
       setSelectedUniversity('');
       setSelectedTrip('');
       setProgressFilter('');
-      setSortBy('name');
+      setSortBy('random');
    };
 
-   const hasActiveFilters = searchTerm || selectedUniversity || selectedTrip || progressFilter || sortBy !== 'name';
+   const hasActiveFilters = searchTerm || selectedUniversity || selectedTrip || progressFilter || sortBy !== 'random';
 
    return (
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -237,6 +217,7 @@ export const StudentSearch = ({ students, onFilteredStudentsChange }: StudentSea
                      onChange={(e) => setSortBy(e.target.value)}
                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
+                     <option value="random">Random</option>
                      <option value="name">Name (A-Z)</option>
                      <option value="progress">Progress (Low to High)</option>
                      <option value="goal">Goal Amount (Low to High)</option>

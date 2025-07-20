@@ -3,7 +3,31 @@ class Api::V1::StudentsController < ApplicationController
   before_action :authenticate_student, only: [:profile]
 
   def index
-    students = Student.includes(:trip, :university).order_by_progress.map do |student|
+    # Check if random ordering is requested
+    if params[:random] == 'true'
+      # Get students ordered by progress (100% students last)
+      ordered_students = Student.includes(:trip, :university).order_by_progress.to_a
+      
+      # Separate students at 100% from those below 100%
+      students_at_100 = []
+      students_below_100 = []
+      
+      ordered_students.each do |student|
+        goal_amount = student.trip&.goal_amount || 0
+        if goal_amount > 0 && student.balance >= goal_amount
+          students_at_100 << student
+        else
+          students_below_100 << student
+        end
+      end
+      
+      # Shuffle only the students below 100%, keep 100% students at the end
+      students = students_below_100.shuffle + students_at_100
+    else
+      students = Student.includes(:trip, :university).order_by_progress
+    end
+    
+    students = students.map do |student|
       {
         id: student.id,
         name: student.name,
