@@ -144,8 +144,7 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
                      <img
                         src="/Give2Go_Logo_Design-removebg-preview.png"
                         alt="Give2Go"
-                        className="h-48 md:h-64 w-auto cursor-pointer hover:opacity-80 transition-opacity duration-200 mb-2"
-                        onClick={() => navigate('/')}
+                        className="h-48 md:h-64 w-auto mb-2"
                      />
                      <p className="text-xs md:text-sm text-gray-600 font-light italic tracking-wide">
                         A Cru Digital Service
@@ -704,7 +703,7 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
 
                <div className="grid md:grid-cols-3 gap-8 text-center">
                   <div>
-                     <div className="text-4xl font-bold text-white mb-2">500+</div>
+                     <div className="text-4xl font-bold text-white mb-2">4500+</div>
                      <div className="text-blue-100">Students Supported</div>
                   </div>
                   <div>
@@ -712,7 +711,7 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick 
                      <div className="text-blue-100">Total Raised</div>
                   </div>
                   <div>
-                     <div className="text-4xl font-bold text-white mb-2">50+</div>
+                     <div className="text-4xl font-bold text-white mb-2">60+</div>
                      <div className="text-blue-100">Countries Served</div>
                   </div>
                </div>

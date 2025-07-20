@@ -430,7 +430,14 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
                   )}
 
                   {/* Submit Button */}
-                  <div className="flex justify-center">
+                  <div className="flex justify-center space-x-4">
+                     <button
+                        type="button"
+                        onClick={() => navigate('/')}
+                        className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-200"
+                     >
+                        Cancel
+                     </button>
                      <button
                         type="submit"
                         disabled={loading || eligibleStudents.length === 0}
