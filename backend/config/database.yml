@@ -25,17 +25,41 @@ test:
 # is mounted as a persistent Docker volume in config/deploy.yml.
 production:
   primary:
-    <<: *default
-    database: storage/production.sqlite3
+    adapter: postgresql
+    encoding: unicode
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+    database: <%= ENV["PG_DATABASE"] || "give2go_production" %>
+    username: <%= ENV["PG_USERNAME"] || "postgres" %>
+    password: <%= ENV["PG_PASSWORD"] || "" %>
+    host: <%= ENV["PG_HOST"] || "localhost" %>
+    port: <%= ENV["PG_PORT"] || 5432 %>
   cache:
-    <<: *default
-    database: storage/production_cache.sqlite3
+    adapter: postgresql
+    encoding: unicode
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+    database: <%= ENV["PG_DATABASE_CACHE"] || "give2go_production_cache" %>
+    username: <%= ENV["PG_USERNAME"] || "postgres" %>
+    password: <%= ENV["PG_PASSWORD"] || "" %>
+    host: <%= ENV["PG_HOST"] || "localhost" %>
+    port: <%= ENV["PG_PORT"] || 5432 %>
     migrations_paths: db/cache_migrate
   queue:
-    <<: *default
-    database: storage/production_queue.sqlite3
+    adapter: postgresql
+    encoding: unicode
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+    database: <%= ENV["PG_DATABASE_QUEUE"] || "give2go_production_queue" %>
+    username: <%= ENV["PG_USERNAME"] || "postgres" %>
+    password: <%= ENV["PG_PASSWORD"] || "" %>
+    host: <%= ENV["PG_HOST"] || "localhost" %>
+    port: <%= ENV["PG_PORT"] || 5432 %>
     migrations_paths: db/queue_migrate
   cable:
-    <<: *default
-    database: storage/production_cable.sqlite3
+    adapter: postgresql
+    encoding: unicode
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+    database: <%= ENV["PG_DATABASE_CABLE"] || "give2go_production_cable" %>
+    username: <%= ENV["PG_USERNAME"] || "postgres" %>
+    password: <%= ENV["PG_PASSWORD"] || "" %>
+    host: <%= ENV["PG_HOST"] || "localhost" %>
+    port: <%= ENV["PG_PORT"] || 5432 %>
     migrations_paths: db/cable_migrate
