@@ -1,95 +1,51 @@
 # give2go
-The Cru Internship design sprint capstone - Give2Go
+Cru Internship design sprint capstone - Give2Go
 
 ## Overview
-Give2Go is a mission trip fundraising platform that connects generous donors with students who are passionate about making a difference through Cru's mission trips. The platform is designed to help students with smaller networks leverage online tools to accelerate their fundraising efforts.
+Give2Go is a mission trip fundraising platform that connects generous donors with students who are passionate about making a difference through Cru's mission trips. The platform is designed to help students with smaller networks leverage online tools to accelerate their fundraising efforts. This project was made during a design sprint week as part of the end of my internship with Cru, where groups of 6 interns each researched the biggest organizational barriers that are preventing summer missions participation, and built solutions to address these barriesrs. According to our findings, finances were the biggest barrier that students had to overcome when preparing to go on a summer mission, and was the most frequent reason why clients we interviewed aren't interested in a Cru summer mission. That's why I built Give2Go: a go-fund-me like platform to significantly optimize ministry partner development initaitves.
+
+## The Goal
+Cru mission trips are incredibly transformative expereinces where college students dedicate 1-8 weeks away from home to serve the local community, spread their faith, and experience life-changing grow in their walk with Christ. However, such ambitious endeavors don't come without a price tag, and the intimating financial contributions required to go on these trips discourage many college students from even considering them. Currently, the only real way to raise the funds needed is to manually reach out to friends and family to inform them of their goal and ask for a donation. While we believe traditional support raising is important for strengthening relationships and growing closer with the Lord, the financial burden is daunting. When knew Cru needed to do more to equip students with the tools needed for success with fund raising.
+
+Give2Go is a network that connects mission-driven students with generous donors through an online giving platform, allowing students to get their name out there in order to significantly increase the funds they can recieve. Students will be no longer limited to their inner circle or the phone numbers in their contacts: Give2Go allows donations from anyone around the world. Acquitainces of students, passionate alumni, churches/organizates, and even complete strangers have hundreds of students at their disposal to donate to, which means students have a limitless supply of potential donors. While we believe this online resource can be a game changer for students hesitant about committing to the lift-changing experience a summer mission can offer, we also don't want to take away from traditional support raising. Give2Go acts as another tool in the toolbox, and with the right marketing, having this tool known can convince many students to explore these trips who would have otherwise immediatelty shut down the idea because of the cost.
 
 ## Features
-- **Student Profiles**: Browse and support individual students
-- **Random Donations**: Let the system choose a student for you to support
-- **Group Donations**: Support multiple students with a single donation using smart fund distribution
-- **Search & Filter**: Find students by university, trip, or location
+- **Student Profiles**: Browse and support individual students. Find your friends and family, or prayerfully considering giving to a student on the other side of the country
+- **Random Donations**: Let the system choose a student for you to support, being a random student from your university, from a trip you went on in the past, or a completely random student
+- **Group Donations**: Support multiple students with a single donation using smart fund distribution, by giving a donation to a university, trip, or even the entire student base
+- **Search & Filter**: Find students by name, university or trip, and sort by progress to give to students struggling to raise funds
 - **Real-time Updates**: See fundraising progress and goal completion in real-time
+- **Authentication**: Allows students to set up an account to get their give link on the site. This is mainly for demo purposes; in practice, students would use their Okta/Cru account they used to apply for their trip.
+- **Modern UI**: Leverages modern frontend frameworks for a beautiful and contempory user interface, powered by a powerful backend API.
 
-## Group Donation Algorithm
+## Tech Stack and Implementation:
 
-The core feature of Give2Go is the intelligent group donation system that ensures fair and efficient distribution of funds among multiple students. Here's how it works:
+### Frontend: uses industry-standard frameworks for a modern and intuitive user experience:
+- **React** with TypeScript
+- **Tailwind CSS** for styling
+- **React Router** for navigation
+- **Vite** for build tooling
 
-### Core Distribution Algorithm
+### Backend: powered by Ruby on Rails - the framework of choice for Cru's engineers, aiming for an easier integration with existing cry systems:
+- **Ruby on Rails** API
+- **PostgreSQL** database
+- **ActiveRecord** for ORM
+- **Active Storage** for file uploads
 
-```ruby
-def distribute_donation(eligible_students, total_amount)
-  distributions = []
-  remaining_amount = total_amount
+### Development tools and philosopy:
+- **Cursor IDE**: Leveraged cutting-edge articial intelligence tools to drastically accelerate development - crucial for getting production-grade systems off the ground in just one week
+- **Deployment**: (Coming Soon)
+- **Prototyping**: The purpose of this project was to be a proof-of-concept, taking advantage of AI to write a lot of the code, to focus more on system architecture, UI/UX design, creative features, and demonstrating
+- **Capstone**: AI-assisted code does not mean this app was built with a single prompt - many hours of careful decision making & intentional design patterns were critical to publish a polished final product
+- **Proof of Concept**: This app was rapidly built in less than a week - expect bugs!
 
-  # First pass: distribute evenly, but don't exceed any student's goal
-  base_amount_per_student = total_amount / eligible_students.length
-  
-  eligible_students.each do |student|
-    goal_amount = student.trip.goal_amount
-    current_balance = student.balance
-    max_can_receive = goal_amount - current_balance
-    
-    amount_for_student = [base_amount_per_student, max_can_receive].min
-    
-    distributions << {
-      student: student,
-      amount: amount_for_student,
-      goal_amount: goal_amount,
-      current_balance: current_balance,
-      max_can_receive: max_can_receive
-    }
-    
-    remaining_amount -= amount_for_student
-  end
+## Group Donation Feature
 
-  # Second pass: redistribute excess funds to students who haven't reached their goal
-  if remaining_amount > 0
-    redistribute_excess(distributions, remaining_amount)
-  end
+The flagship feature of Give2Go that really makes our platform stand out is the intelligent group donation system that ensures fair and efficient distribution of funds among multiple students. To further encourage donations, we built algorithms in order to give donors the options to spread their donations accross multiple students. Is a donor a passionate alumni whow wants to uplift students at the university they graduated from? They can donate to all students in the system who go to that university. Did the donor go on a specific trip a year or two? They can give back to all the students raising support for that trip this year. Is the donor representing a church or external organization? They can give one big donation to the entire student base, funding the mission trip movement in its entirety. Here's how it works:
 
-  # Calculate average amount actually distributed
-  total_distributed = distributions.sum { |d| d[:amount] }
-  average_amount = total_distributed / distributions.length
+### Distribution Algorithm:
 
-  {
-    distributions: distributions,
-    average_amount: average_amount,
-    total_distributed: total_distributed
-  }
-end
-
-def redistribute_excess(distributions, excess_amount)
-  # Get students who haven't reached their goal and can receive more
-  eligible_for_redistribution = distributions.select do |d|
-    d[:amount] < d[:max_can_receive]
-  end
-
-  return if eligible_for_redistribution.empty?
-
-  # Distribute excess evenly among eligible students
-  excess_per_student = excess_amount / eligible_for_redistribution.length
-  
-  # Track how much we actually distributed in this round
-  distributed_this_round = 0
-  
-  eligible_for_redistribution.each do |distribution|
-    additional_amount = [excess_per_student, distribution[:max_can_receive] - distribution[:amount]].min
-    distribution[:amount] += additional_amount
-    distributed_this_round += additional_amount
-  end
-
-  # If we couldn't distribute all the excess in this round, try again with remaining amount
-  remaining_excess = excess_amount - distributed_this_round
-  if remaining_excess > 0
-    redistribute_excess(distributions, remaining_excess)
-  end
-end
-```
-
-### How the Algorithm Works
-
-1. **Initial Distribution**: Divides the total amount evenly among all eligible students, but caps each student at what they actually need to reach their goal.
+1. **Initial Distribution**: Divides the total amount evenly among all eligible students, but caps each student at the max they can recieve before they over shoot their goal amount.
 
 2. **Excess Calculation**: Tracks any remaining funds that couldn't be distributed in the first pass.
 
@@ -118,58 +74,9 @@ Let's say you donate **$100** to a group of **4 students**:
 
 ## Unequal Distribution Algorithm
 
-Give2Go also supports an advanced unequal distribution system that allows donors to bias donations toward students with higher fundraising needs. This feature provides more nuanced control over how funds are distributed.
+Give2Go also supports an advanced unequal distribution algorithm that allows donors to bias the distribution toward students with higher fundraising needs. This feature provides more nuanced control over how funds are distributed, by using a carefully designed mathematical forumla to calculate the funds each student recieves.
 
-### Unequal Distribution Code Snippet
-
-```typescript
-// Helper for recursive redistribution
-function distribute(amountLeft: number, needsLeft: number[], excluded: Set<number> = new Set()): number[] {
-   // Calculate weights for students not excluded
-   let weights = needsLeft.map((need: number, i: number) => {
-      if (excluded.has(i) || need <= 0) return 0;
-      const equal = 1 / (N - excluded.size);
-      const proportional = totalNeed > 0 ? need / totalNeed : equal;
-      return (1 - biasFactor) * equal + biasFactor * proportional;
-   });
-   const totalWeight = weights.reduce((a: number, b: number) => a + b, 0);
-   if (totalWeight === 0) return Array(N).fill(0);
-   
-   // Initial allocation
-   let allocation = weights.map((w: number) => (w / totalWeight) * amountLeft);
-   
-   // Cap at need, collect excess
-   let excess = 0;
-   let capped = false;
-   let result = Array(N).fill(0);
-   for (let i = 0; i < N; ++i) {
-      if (excluded.has(i) || needsLeft[i] <= 0) continue;
-      if (allocation[i] > needsLeft[i]) {
-         excess += allocation[i] - needsLeft[i];
-         allocation[i] = needsLeft[i];
-         capped = true;
-      }
-      result[i] = allocation[i];
-   }
-   
-   if (capped && excess > 0.0001) {
-      // Redistribute excess among not-yet-capped
-      const newNeeds = needsLeft.map((need: number, i: number) =>
-         excluded.has(i) || allocation[i] >= need ? 0 : need - allocation[i]
-      );
-      const newExcluded = new Set<number>(
-         Array.from(excluded).concat(
-            allocation.map((a: number, i: number) => (a >= needsLeft[i] ? i : null)).filter((i: number | null) => i !== null) as number[]
-         )
-      );
-      const recursive = distribute(excess, newNeeds, newExcluded);
-      for (let i = 0; i < N; ++i) result[i] += recursive[i];
-   }
-   return result;
-}
-```
-
-### How the Unequal Distribution Works
+### How the Unequal Distribution Works:
 
 #### 1. Hybrid Weighting System
 The algorithm uses a **bias factor** (0-1) to blend two distribution methods:
@@ -192,9 +99,9 @@ When a student reaches their goal, the algorithm:
 - **Recursive**: Handles complex scenarios where multiple students reach goals simultaneously
 
 #### 4. Example
-With $800 donation and 3 students:
-- **Student A**: Needs $200 (20% of total need)
-- **Student B**: Needs $300 (30% of total need) 
+Let's say a donor wants to donate $800 to students at the University of Georgia who are going on a Cru mission, which happens to be 3:
+- **Student A**: Needs $200 (20% of the total need)
+- **Student B**: Needs $300 (30% of the total need) 
 - **Student C**: Needs $500 (50% of total need)
 
 **Equal distribution (bias=0.0)**: $200, $300, $300 (after redistribution; A and B reach their goals, C gets the rest)
@@ -204,28 +111,70 @@ With $800 donation and 3 students:
 
 This ensures that students with higher fundraising needs receive more support while still maintaining fairness and preventing excess funds going to students who have already reached their goal.
 
-## Technology Stack
+### Behind the Scenes:
+```ruby
+def distribute_with_bias(amount_left, needs, bias_factor, total_need, n, excluded = Set.new)
+  # Calculate weights for students not excluded
+  weights = needs.map.with_index do |need, i|
+    next 0 if excluded.include?(i) || need <= 0
 
-### Frontend
-- **React** with TypeScript
-- **Tailwind CSS** for styling
-- **React Router** for navigation
-- **Vite** for build tooling
+    equal = 1.0 / (n - excluded.size)
+    proportional = total_need > 0 ? need / total_need : equal
+    (1 - bias_factor) * equal + bias_factor * proportional
+  end
 
-### Backend
-- **Ruby on Rails** API
-- **PostgreSQL** database
-- **ActiveRecord** for ORM
-- **Active Storage** for file uploads
+  total_weight = weights.sum
+  return Array.new(n, 0) if total_weight == 0
 
-## Getting Started
+  # Initial allocation
+  allocation = weights.map { |w| (w / total_weight) * amount_left }
+
+  # Cap at need and collect excess
+  excess = 0
+  capped = false
+  result = Array.new(n, 0)
+
+  allocation.each_with_index do |alloc, i|
+    next if excluded.include?(i) || needs[i] <= 0
+
+    if alloc > needs[i]
+      excess += alloc - needs[i]
+      allocation[i] = needs[i]
+      capped = true
+    end
+    result[i] = allocation[i]
+  end
+
+  # Redistribute excess if needed
+  if capped && excess > 0.0001
+    new_needs = needs.map.with_index do |need, i|
+      if excluded.include?(i) || allocation[i] >= need
+        0
+      else
+        need - allocation[i]
+      end
+    end
+
+    new_excluded = excluded.dup
+    allocation.each_with_index do |alloc, i|
+      new_excluded.add(i) if alloc >= needs[i]
+    end
+
+    recursive = distribute_with_bias(excess, new_needs, bias_factor, total_need, n, new_excluded)
+    result.each_with_index { |val, i| result[i] = val + recursive[i] }
+  end
+
+  result
+end
+```
+
+
+## Installation:
 
 ### Prerequisites
 - Node.js (v18+)
 - Ruby (v3.0+)
 - PostgreSQL
-
-### Installation
 
 1. Clone the repository:
 ```bash
