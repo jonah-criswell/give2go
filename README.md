@@ -1,4 +1,4 @@
-# give2go
+# Give2Go
 Cru Internship design sprint capstone - Give2Go
 
 # Overview
@@ -114,10 +114,10 @@ Let's say a donor wants to donate $800 to students at the University of Georgia 
 - **Student B**: Needs $300 (30% of the total need) 
 - **Student C**: Needs $500 (50% of total need)
 
-**Equal distribution (bias=0.0)**: $200, $300, $300 (after redistribution; A and B reach their goals, C gets the rest)
-**Pure proportional (bias=1.0)**: $160, $240, $400 (20%, 30%, 50%)
-**Custom Skew (bias=0.7, less equal, more need-based)**: $192, $248, $360 (24%, 31%, 45%)
-**Custom Skew (bias=0.3, more equal, less need-based)**: $200, $264.77, $335.24 (A capped, B and C get the rest proportionally)
+- **Equal distribution (bias=0.0)**: $200, $300, $300 (after redistribution; A and B reach their goals, C gets the rest)
+- **Pure proportional (bias=1.0)**: $160, $240, $400 (20%, 30%, 50%)
+- **Custom Skew (bias=0.7, less equal, more need-based)**: $192, $248, $360 (24%, 31%, 45%)
+- **Custom Skew (bias=0.3, more equal, less need-based)**: $200, $264.77, $335.24 (A capped, B and C get the rest proportionally)
 
 This ensures that students with higher fundraising needs receive more support while still maintaining fairness and preventing excess funds going to students who have already reached their goal.
 
