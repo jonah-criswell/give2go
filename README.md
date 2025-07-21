@@ -1,12 +1,12 @@
-# Give2Go
+# 💸Give2Go
 Cru Internship design sprint capstone - Give2Go
 
-# Overview
+# 🔎Overview
   Give2Go is a mission trip fundraising platform that connects generous donors with students who are passionate about making a difference through Cru's mission trips. The platform is designed to help students with smaller networks leverage online tools to accelerate their fundraising efforts. This project was made during a design sprint week as part of the end of my internship with Cru, where groups of 6 interns each researched the biggest organizational barriers that are preventing summer missions participation, and built solutions to address these barriesrs. 
   
   According to our findings, finances were the biggest barrier that students had to overcome when preparing to go on a summer mission, and was the most frequent reason why clients we interviewed aren't interested in a Cru summer mission. That's why I built Give2Go: a go-fund-me like platform to significantly optimize ministry partner development initaitves.
 
-# The Goal
+# 🎯The Goal
   Cru mission trips are incredibly transformative expereinces where college students dedicate 1-8 weeks away from home to serve the local community, spread their faith, and experience life-changing grow in their walk with Christ. However, such ambitious endeavors don't come without a price tag, and the intimating financial contributions required to go on these trips discourage many college students from even considering them. 
 
   Currently, the only real way to raise the funds needed is to manually reach out to friends and family to inform them of their goal and ask for a donation. While we believe traditional support raising is important for strengthening relationships and growing closer with the Lord, the financial burden is daunting. When knew Cru needed to do more to equip students with the tools needed for success with fund raising.
@@ -15,7 +15,7 @@ Cru Internship design sprint capstone - Give2Go
 
   While we believe this online resource can be a game changer for students hesitant about committing to the lift-changing experience a summer mission can offer, we also don't want to take away from traditional support raising. Give2Go acts as another tool in the toolbox, and with the right marketing, having this tool known can convince many students to explore these trips who would have otherwise immediatelty shut down the idea because of the cost.
 
-# Features
+# ⚙️Features
 - **Student Profiles**: Browse and support individual students. Find your friends and family, or prayerfully considering giving to a student on the other side of the country
 - **Random Donations**: Let the system choose a student for you to support, being a random student from your university, from a trip you went on in the past, or a completely random student
 - **Group Donations**: Support multiple students with a single donation using smart fund distribution, by giving a donation to a university, trip, or even the entire student base
@@ -24,28 +24,28 @@ Cru Internship design sprint capstone - Give2Go
 - **Authentication**: Allows students to set up an account to get their give link on the site. This is mainly for demo purposes; in practice, students would use their Okta/Cru account they used to apply for their trip.
 - **Modern UI**: Leverages modern frontend frameworks for a beautiful and contempory user interface, powered by a powerful backend API.
 
-# Tech Stack and Implementation:
+# 🛠️Tech Stack and Implementation:
 
-### Frontend: uses industry-standard frameworks for a modern and intuitive user experience:
+### 🖥️Frontend: uses industry-standard frameworks for a modern and intuitive user experience:
 - **React** with TypeScript
 - **Tailwind CSS** for styling
 - **React Router** for navigation
 - **Vite** for build tooling
 
-### Backend: powered by Ruby on Rails - the framework of choice for Cru's engineers, aiming for an easier integration with existing cry systems:
+### 💾Backend: powered by Ruby on Rails - the framework of choice for Cru's engineers, aiming for an easier integration with existing cry systems:
 - **Ruby on Rails** API
 - **PostgreSQL** database
 - **ActiveRecord** for ORM
 - **Active Storage** for file uploads
 
-### Development tools and philosopy:
+### 🧠Development tools and philosopy:
 - **Cursor IDE**: Leveraged cutting-edge articial intelligence tools to drastically accelerate development - crucial for getting production-grade systems off the ground in just one week
 - **Deployment**: (Coming Soon)
 - **Prototyping**: The purpose of this project was to be a proof-of-concept, taking advantage of AI to write a lot of the code, to focus more on system architecture, UI/UX design, creative features, and demonstrating
 - **Capstone**: AI-assisted code does not mean this app was built with a single prompt - many hours of careful decision making & intentional design patterns were critical to publish a polished final product
 - **Proof of Concept**: This app was rapidly built in less than a week - expect bugs!
 
-# Group Donation Feature
+# 👪Group Donation Feature
 
 The flagship feature of Give2Go that really makes our platform stand out is the intelligent group donation system that ensures fair and efficient distribution of funds among multiple students. To further encourage donations, we built algorithms in order to give donors the options to spread their donations accross multiple students. 
 
@@ -53,7 +53,7 @@ The flagship feature of Give2Go that really makes our platform stand out is the 
 - Did the donor go on a specific trip a year or two? They can give back to all the students raising support for that trip this year.
 - Is the donor representing a church or external organization? They can give one big donation to the entire student base, funding the mission trip movement in its entirety. Here's how it works:
 
-### Distribution Algorithm:
+### 👨‍🔬Distribution Algorithm:
 
 1. **Initial Distribution**: Divides the total amount evenly among all eligible students, but caps each student at the max they can recieve before they over shoot their goal amount.
 
@@ -121,7 +121,7 @@ Let's say a donor wants to donate $800 to students at the University of Georgia 
 
 This ensures that students with higher fundraising needs receive more support while still maintaining fairness and preventing excess funds going to students who have already reached their goal.
 
-### Behind the Scenes:
+### 🔎Behind the Scenes:
 ```ruby
 def distribute_with_bias(amount_left, needs, bias_factor, total_need, n, excluded = Set.new)
   # Calculate weights for students not excluded
@@ -179,7 +179,7 @@ end
 ```
 
 
-## Installation:
+## 🎛️Installation:
 
 ### Prerequisites
 - Node.js (v18+)
