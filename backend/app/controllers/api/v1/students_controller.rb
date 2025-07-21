@@ -5,8 +5,8 @@ class Api::V1::StudentsController < ApplicationController
   def index
     # Check if random ordering is requested
     if params[:random] == 'true'
-      # Get students ordered by progress (100% students last)
-      ordered_students = Student.includes(:trip, :university).order_by_progress.to_a
+      # Get students ordered by progress (100% students last) with profile pictures preloaded
+      ordered_students = Student.includes(:trip, :university, profile_picture_attachment: :blob).order_by_progress.to_a
       
       # Separate students at 100% from those below 100%
       students_at_100 = []
@@ -24,7 +24,8 @@ class Api::V1::StudentsController < ApplicationController
       # Shuffle only the students below 100%, keep 100% students at the end
       students = students_below_100.shuffle + students_at_100
     else
-      students = Student.includes(:trip, :university).order_by_progress
+      # Preload profile pictures to avoid N+1 queries
+      students = Student.includes(:trip, :university, profile_picture_attachment: :blob).order_by_progress
     end
     
     students = students.map do |student|

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import type { Student } from '../types';
@@ -27,7 +27,8 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
    const [donorPhone, setDonorPhone] = useState('');
    const [note, setNote] = useState('');
    const [errors, setErrors] = useState<Record<string, string>>({});
-   const [distributionType, setDistributionType] = useState<'equal' | 'biased'>('equal');
+
+   const [distributionType, setDistributionType] = useState<'equal' | 'customizable'>('equal');
    const [biasFactor, setBiasFactor] = useState(0.5);
 
    // Fetch all students to get universities and trips
@@ -84,7 +85,13 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
       });
    };
 
-   const eligibleStudents = getEligibleStudents();
+   // Memoize eligible students to prevent infinite re-renders
+   const eligibleStudents = useMemo(() => getEligibleStudents(), [
+      students,
+      selectedGroup,
+      selectedUniversity,
+      selectedTrip
+   ]);
 
    // Calculate maximum distributable amount
    const calculateMaxDistributableAmount = () => {
@@ -152,6 +159,7 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
                donor_email: donorEmail || null,
                donor_phone: donorPhone || null,
                note: note || null,
+               ...(distributionType === 'customizable' && { bias_factor: biasFactor }),
             }),
          });
 
@@ -176,95 +184,87 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
       }
    };
 
-   const calculatePreview = () => {
+   const [previewData, setPreviewData] = useState<any>(null);
+
+   const calculatePreview = async () => {
       if (!donationAmount || eligibleStudents.length === 0) return null;
 
-      const amount = parseFloat(donationAmount);
-      const needs = eligibleStudents.map(student => {
-         const goalAmount = student.trip?.goal_amount || 5000;
-         return Math.max(0, goalAmount - student.balance);
-      });
-      const totalNeed = needs.reduce((a, b) => a + b, 0);
-      const N = eligibleStudents.length;
+      try {
+         // For equal distribution, we don't send bias_factor (backend will use original algorithm)
+         // For customizable distribution, we send the bias_factor
+         const params = new URLSearchParams({
+            amount: donationAmount,
+            group_type: selectedGroup,
+            ...(distributionType === 'customizable' && { bias_factor: biasFactor.toString() }),
+            ...(selectedGroup === 'university' && selectedUniversity && { university: selectedUniversity }),
+            ...(selectedGroup === 'trip' && selectedTrip && { trip_name: selectedTrip })
+         });
 
-      // Helper for recursive redistribution
-      function distribute(amountLeft: number, needsLeft: number[], excluded: Set<number> = new Set()): number[] {
-         // Calculate weights for students not excluded
-         let weights = needsLeft.map((need: number, i: number) => {
-            if (excluded.has(i) || need <= 0) return 0;
-            const equal = 1 / (N - excluded.size);
-            const proportional = totalNeed > 0 ? need / totalNeed : equal;
-            return (1 - biasFactor) * equal + biasFactor * proportional;
-         });
-         const totalWeight = weights.reduce((a: number, b: number) => a + b, 0);
-         if (totalWeight === 0) return Array(N).fill(0);
-         // Initial allocation
-         let allocation = weights.map((w: number) => (w / totalWeight) * amountLeft);
-         // Cap at need, collect excess
-         let excess = 0;
-         let capped = false;
-         let result = Array(N).fill(0);
-         for (let i = 0; i < N; ++i) {
-            if (excluded.has(i) || needsLeft[i] <= 0) continue;
-            if (allocation[i] > needsLeft[i]) {
-               excess += allocation[i] - needsLeft[i];
-               allocation[i] = needsLeft[i];
-               capped = true;
-            }
-            result[i] = allocation[i];
-         }
-         if (capped && excess > 0.0001) {
-            // Redistribute excess among not-yet-capped
-            const newNeeds = needsLeft.map((need: number, i: number) =>
-               excluded.has(i) || allocation[i] >= need ? 0 : need - allocation[i]
-            );
-            const newExcluded = new Set<number>(
-               Array.from(excluded).concat(
-                  allocation.map((a: number, i: number) => (a >= needsLeft[i] ? i : null)).filter((i: number | null) => i !== null) as number[]
-               )
-            );
-            const recursive = distribute(excess, newNeeds, newExcluded);
-            for (let i = 0; i < N; ++i) result[i] += recursive[i];
-         }
-         return result;
-      }
+         const response = await fetch(`/api/v1/group_donations/preview?${params}`);
 
-      let distribution;
-      if (distributionType === 'equal') {
-         // Equal distribution (legacy)
-         const baseAmountPerStudent = amount / N;
-         distribution = eligibleStudents.map((student, i) => {
-            const wouldReceive = Math.min(baseAmountPerStudent, needs[i]);
-            return {
-               student,
-               wouldReceive,
-               remaining: needs[i],
-               goalAmount: student.trip?.goal_amount || 5000
-            };
-         });
-      } else {
-         // Biased distribution
-         const allocations = distribute(amount, needs);
-         distribution = eligibleStudents.map((student, i) => {
-            return {
-               student,
-               wouldReceive: allocations[i],
-               remaining: needs[i],
-               goalAmount: student.trip?.goal_amount || 5000
-            };
-         });
+         if (response.ok) {
+            const data = await response.json();
+            setPreviewData(data);
+            return data;
+         } else {
+            const errorData = await response.json();
+            console.error('Preview error:', errorData.error);
+            return null;
+         }
+      } catch (error) {
+         console.error('Preview network error:', error);
+         return null;
       }
-      const totalDistributed = distribution.reduce((sum, d) => sum + d.wouldReceive, 0);
-      const excess = amount - totalDistributed;
-      return {
-         distribution,
-         totalDistributed,
-         baseAmountPerStudent: amount / N,
-         excess
-      };
    };
 
-   const preview = calculatePreview();
+   // Preload preview data when component mounts or group changes
+   useEffect(() => {
+      if (eligibleStudents.length > 0) {
+         // Preload with a default amount to warm up the cache
+         const params = new URLSearchParams({
+            amount: '1000',
+            group_type: selectedGroup,
+            ...(selectedGroup === 'university' && selectedUniversity && { university: selectedUniversity }),
+            ...(selectedGroup === 'trip' && selectedTrip && { trip_name: selectedTrip })
+         });
+
+         fetch(`/api/v1/group_donations/preview?${params}`).catch(() => {
+            // Silently fail - this is just for cache warming
+         });
+      }
+   }, [selectedGroup, selectedUniversity, selectedTrip, eligibleStudents.length]);
+
+   // Calculate preview when relevant values change (with optimized debouncing)
+   useEffect(() => {
+      // Clear any existing timeout
+      let timeoutId: ReturnType<typeof setTimeout>;
+
+      if (donationAmount && eligibleStudents.length > 0 && parseFloat(donationAmount) > 0) {
+         // Use minimal debounce for maximum responsiveness
+         timeoutId = setTimeout(() => {
+            calculatePreview();
+         }, 100); // Reduced to 100ms for near-instant response
+      } else {
+         // Clear preview data when no donation amount or no eligible students
+         setPreviewData(null);
+      }
+
+      return () => {
+         if (timeoutId) {
+            clearTimeout(timeoutId);
+         }
+      };
+   }, [donationAmount, selectedGroup, selectedUniversity, selectedTrip, distributionType, biasFactor, students]);
+
+   // Memoize the formatted average amount to prevent unnecessary recalculations
+   const formattedAverageAmount = useMemo(() => {
+      if (previewData?.average_amount) {
+         return parseFloat(previewData.average_amount).toFixed(2);
+      }
+      return null;
+   }, [previewData?.average_amount]);
+
+   const preview = previewData;
 
    return (
       <div className="min-h-screen bg-gray-50">
@@ -397,7 +397,7 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
                   {/* Distribution Type Toggle */}
                   <div>
                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Distribution Type
+                        Distribution Method
                      </label>
                      <div className="flex items-center space-x-6">
                         <label className="flex items-center">
@@ -415,21 +415,21 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
                            <input
                               type="radio"
                               name="distributionType"
-                              value="biased"
-                              checked={distributionType === 'biased'}
-                              onChange={() => setDistributionType('biased')}
+                              value="customizable"
+                              checked={distributionType === 'customizable'}
+                              onChange={() => setDistributionType('customizable')}
                               className="mr-2"
                            />
-                           <span className="text-gray-700">Biased (Need-Based) Distribution</span>
+                           <span className="text-gray-700">Customizable Distribution</span>
                         </label>
                      </div>
                   </div>
 
-                  {/* Bias Factor Slider */}
-                  {distributionType === 'biased' && (
-                     <div className="mt-2">
+                  {/* Bias Factor Slider - Only show for customizable distribution */}
+                  {distributionType === 'customizable' && (
+                     <div>
                         <label htmlFor="biasFactor" className="block text-sm font-medium text-gray-700 mb-1">
-                           Bias Factor: <span className="font-semibold text-blue-700">{biasFactor}</span>
+                           Distribution Bias: <span className="font-semibold text-blue-700">{biasFactor}</span>
                         </label>
                         <input
                            type="range"
@@ -442,8 +442,8 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
                            className="w-full"
                         />
                         <div className="flex justify-between text-xs text-gray-500 mt-1">
-                           <span>Equal</span>
-                           <span>Proportional to Need</span>
+                           <span>More Equal (0.0)</span>
+                           <span>More Proportional to Need (1.0)</span>
                         </div>
                      </div>
                   )}
@@ -468,17 +468,12 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
                   </div>
 
                   {/* Donation Preview */}
-                  {preview && (
+                  {formattedAverageAmount && (
                      <div className="bg-green-50 p-4 rounded-lg">
                         <h3 className="font-semibold text-green-800 mb-2">Donation Preview</h3>
                         <p className="text-green-700 text-sm">
-                           Each student will receive approximately <strong>${preview.baseAmountPerStudent.toFixed(2)}</strong>
+                           Each student will receive approximately <strong>${formattedAverageAmount}</strong>
                         </p>
-                        {preview.excess > 0 && (
-                           <p className="text-green-700 text-sm mt-1">
-                              <strong>${preview.excess.toFixed(2)}</strong> will be redistributed to students who haven't reached their goal
-                           </p>
-                        )}
                      </div>
                   )}
 
