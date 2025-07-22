@@ -99,18 +99,18 @@ puts "Seeded #{trips.length} trips"
 # Create students with varied fundraising progress
 student_data = [
   # Students with low progress (0-25%)
-  { name: 'Sarah Johnson', email: 'sarah.johnson@uga.edu', university: 'University of Georgia', trip: 'Kenya Mission Trip', balance: 500, year: '2nd', major: 'Psychology', headline: 'Passionate about mental health outreach' },
-  { name: 'Michael Chen', email: 'michael.chen@gatech.edu', university: 'Georgia Institute of Technology', trip: 'Costa Rica Service Project', balance: 800, year: '3rd', major: 'Computer Science', headline: 'Using technology to serve communities' },
-  { name: 'Emily Rodriguez', email: 'emily.rodriguez@emory.edu', university: 'Emory University', trip: 'Guatemala Community Outreach', balance: 300, year: '1st', major: 'Public Health', headline: 'Dedicated to improving global health' },
-  { name: 'David Kim', email: 'david.kim@gsu.edu', university: 'Georgia State University', trip: 'Mexico Border Ministry', balance: 600, year: '4th', major: 'Social Work', headline: 'Advocating for vulnerable populations' },
-  { name: 'Jessica Williams', email: 'jessica.williams@ksu.edu', university: 'Kennesaw State University', trip: 'Dominican Republic Mission', balance: 400, year: '2nd', major: 'Education', headline: 'Empowering through education' },
+  { name: 'Sarah Johnson', email: 'sarah.johnson@uga.edu', university: 'University of Georgia', trip: 'Kenya Mission Trip', balance: 500, year: '2nd', major: 'Psychology', headline: 'Passionate about mental health outreach', image_url: 'https://randomuser.me/api/portraits/women/1.jpg' },
+  { name: 'Michael Chen', email: 'michael.chen@gatech.edu', university: 'Georgia Institute of Technology', trip: 'Costa Rica Service Project', balance: 800, year: '3rd', major: 'Computer Science', headline: 'Using technology to serve communities', image_url: 'https://randomuser.me/api/portraits/men/2.jpg' },
+  { name: 'Emily Rodriguez', email: 'emily.rodriguez@emory.edu', university: 'Emory University', trip: 'Guatemala Community Outreach', balance: 300, year: '1st', major: 'Public Health', headline: 'Dedicated to improving global health', image_url: 'https://randomuser.me/api/portraits/women/3.jpg' },
+  { name: 'David Kim', email: 'david.kim@gsu.edu', university: 'Georgia State University', trip: 'Mexico Border Ministry', balance: 600, year: '4th', major: 'Social Work', headline: 'Advocating for vulnerable populations', image_url: 'https://randomuser.me/api/portraits/men/4.jpg' },
+  { name: 'Jessica Williams', email: 'jessica.williams@ksu.edu', university: 'Kennesaw State University', trip: 'Dominican Republic Mission', balance: 400, year: '2nd', major: 'Education', headline: 'Empowering through education', image_url: 'https://randomuser.me/api/portraits/women/5.jpg' },
   
   # Students with medium progress (25-75%)
-  { name: 'Alex Thompson', email: 'alex.thompson@ung.edu', university: 'University of North Georgia', trip: 'Kenya Mission Trip', balance: 1500, year: '3rd', major: 'International Affairs', headline: 'Building bridges across cultures' },
-  { name: 'Maria Garcia', email: 'maria.garcia@georgiasouthern.edu', university: 'Georgia Southern University', trip: 'Costa Rica Service Project', balance: 2200, year: '2nd', major: 'Environmental Science', headline: 'Protecting our planet together' },
-  { name: 'James Wilson', email: 'james.wilson@uwg.edu', university: 'University of West Georgia', trip: 'Guatemala Community Outreach', balance: 1800, year: '4th', major: 'Business Administration', headline: 'Business with a purpose' },
-  { name: 'Lisa Anderson', email: 'lisa.anderson@valdosta.edu', university: 'Valdosta State University', trip: 'Mexico Border Ministry', balance: 1200, year: '1st', major: 'Criminal Justice', headline: 'Justice and compassion in action' },
-  { name: 'Robert Martinez', email: 'robert.martinez@augusta.edu', university: 'Augusta University', trip: 'Dominican Republic Mission', balance: 2000, year: '3rd', major: 'Nursing', headline: 'Caring for communities in need' },
+  { name: 'Alex Thompson', email: 'alex.thompson@ung.edu', university: 'University of North Georgia', trip: 'Kenya Mission Trip', balance: 1500, year: '3rd', major: 'International Affairs', headline: 'Building bridges across cultures', image_url: 'https://randomuser.me/api/portraits/men/6.jpg' },
+  { name: 'Maria Garcia', email: 'maria.garcia@georgiasouthern.edu', university: 'Georgia Southern University', trip: 'Costa Rica Service Project', balance: 2200, year: '2nd', major: 'Environmental Science', headline: 'Protecting our planet together', image_url: 'https://randomuser.me/api/portraits/women/7.jpg' },
+  { name: 'James Wilson', email: 'james.wilson@uwg.edu', university: 'University of West Georgia', trip: 'Guatemala Community Outreach', balance: 1800, year: '4th', major: 'Business Administration', headline: 'Business with a purpose', image_url: 'https://randomuser.me/api/portraits/men/8.jpg' },
+  { name: 'Lisa Anderson', email: 'lisa.anderson@valdosta.edu', university: 'Valdosta State University', trip: 'Mexico Border Ministry', balance: 1200, year: '1st', major: 'Criminal Justice', headline: 'Justice and compassion in action', image_url: 'https://randomuser.me/api/portraits/women/9.jpg' },
+  { name: 'Robert Martinez', email: 'robert.martinez@augusta.edu', university: 'Augusta University', trip: 'Dominican Republic Mission', balance: 2000, year: '3rd', major: 'Nursing', headline: 'Caring for communities in need', image_url: 'https://randomuser.me/api/portraits/men/10.jpg' },
   
   # Students with high progress (75-99%)
   { name: 'Amanda Foster', email: 'amanda.foster@utexas.edu', university: 'University of Texas at Austin', trip: 'Kenya Mission Trip', balance: 3500, year: '2nd', major: 'Anthropology', headline: 'Understanding cultures, building connections' },
@@ -127,18 +127,18 @@ student_data = [
   { name: 'Brian Wilson', email: 'brian.wilson@uta.edu', university: 'University of Texas at Arlington', trip: 'Dominican Republic Mission', balance: 4500, year: '4th', major: 'Social Work', headline: 'Building stronger communities' },
   
   # Additional students for pagination demonstration
-  { name: 'Ashley Moore', email: 'ashley.moore@utsa.edu', university: 'University of Texas at San Antonio', trip: 'Kenya Mission Trip', balance: 900, year: '2nd', major: 'Public Health', headline: 'Health equity for all' },
-  { name: 'Ryan Clark', email: 'ryan.clark@utep.edu', university: 'University of Texas at El Paso', trip: 'Costa Rica Service Project', balance: 1600, year: '3rd', major: 'Environmental Science', headline: 'Sustainable solutions for tomorrow' },
-  { name: 'Megan Lewis', email: 'megan.lewis@utb.edu', university: 'University of Texas at Brownsville', trip: 'Guatemala Community Outreach', balance: 700, year: '1st', major: 'Education', headline: 'Teaching with heart and purpose' },
-  { name: 'Jason Hall', email: 'jason.hall@uttyler.edu', university: 'University of Texas at Tyler', trip: 'Mexico Border Ministry', balance: 1100, year: '4th', major: 'Criminal Justice', headline: 'Justice and mercy in balance' },
-  { name: 'Katherine Young', email: 'katherine.young@utpb.edu', university: 'University of Texas at Permian Basin', trip: 'Dominican Republic Mission', balance: 1400, year: '2nd', major: 'Nursing', headline: 'Compassionate care across borders' },
-  { name: 'Thomas Allen', email: 'thomas.allen@utrgv.edu', university: 'University of Texas at Rio Grande Valley', trip: 'Kenya Mission Trip', balance: 1900, year: '3rd', major: 'International Business', headline: 'Business for social impact' }
+  { name: 'Ashley Moore', email: 'ashley.moore@utsa.edu', university: 'University of Texas at San Antonio', trip: 'Kenya Mission Trip', balance: 900, year: '2nd', major: 'Public Health', headline: 'Health equity for all', image_url: 'https://randomuser.me/api/portraits/women/11.jpg' },
+  { name: 'Ryan Clark', email: 'ryan.clark@utep.edu', university: 'University of Texas at El Paso', trip: 'Costa Rica Service Project', balance: 1600, year: '3rd', major: 'Environmental Science', headline: 'Sustainable solutions for tomorrow', image_url: 'https://randomuser.me/api/portraits/men/12.jpg' },
+  { name: 'Megan Lewis', email: 'megan.lewis@utb.edu', university: 'University of Texas at Brownsville', trip: 'Guatemala Community Outreach', balance: 700, year: '1st', major: 'Education', headline: 'Teaching with heart and purpose', image_url: 'https://randomuser.me/api/portraits/women/13.jpg' },
+  { name: 'Jason Hall', email: 'jason.hall@uttyler.edu', university: 'University of Texas at Tyler', trip: 'Mexico Border Ministry', balance: 1100, year: '4th', major: 'Criminal Justice', headline: 'Justice and mercy in balance', image_url: 'https://randomuser.me/api/portraits/men/14.jpg' },
+  { name: 'Katherine Young', email: 'katherine.young@utpb.edu', university: 'University of Texas at Permian Basin', trip: 'Dominican Republic Mission', balance: 1400, year: '2nd', major: 'Nursing', headline: 'Compassionate care across borders', image_url: 'https://randomuser.me/api/portraits/women/15.jpg' },
+  { name: 'Thomas Allen', email: 'thomas.allen@utrgv.edu', university: 'University of Texas at Rio Grande Valley', trip: 'Kenya Mission Trip', balance: 1900, year: '3rd', major: 'International Business', headline: 'Business for social impact', image_url: 'https://randomuser.me/api/portraits/men/16.jpg' }
 ]
 
 student_data.each do |student_info|
   university = University.find_by(name: student_info[:university])
   trip = Trip.find_by(name: student_info[:trip])
-  
+
   if university && trip
     student = Student.find_or_create_by(email: student_info[:email]) do |s|
       s.name = student_info[:name]
@@ -147,16 +147,23 @@ student_data.each do |student_info|
       s.major = student_info[:major]
       s.headline = student_info[:headline]
       s.balance = student_info[:balance]
-      s.password = 'password123' # Default password for demo
+      s.password = 'password123'
     end
-    
-    # Create student profile if it doesn't exist
+
     unless student.student_profile
       StudentProfile.create!(student: student, trip: trip)
+    end
+
+    # Attach profile picture from randomuser.me if not already attached
+    if student_info[:image_url] && !student.profile_picture.attached?
+      student.profile_picture.attach(
+        io: URI.open(student_info[:image_url]),
+        filename: File.basename(URI.parse(student_info[:image_url]).path)
+      )
     end
   end
 end
 
-puts "Seeded #{student_data.length} students"
+puts "Seeded #{student_data.length} students with images"
 puts "Total students in database: #{Student.count}"
 puts "Students will be paginated with 16 per page"
