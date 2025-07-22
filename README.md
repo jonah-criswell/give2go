@@ -1,5 +1,6 @@
 # 💸Give2Go
 Cru Internship design sprint capstone - Give2Go - Access the live demo: https://give2go.vercel.app/
+Note - the app is not yet optimized for mobile. For the best viewing experience, visit the site on PC.
 
 # 🔎Overview
   Give2Go is a mission trip fundraising platform that connects generous donors with students who are passionate about making a difference through Cru's mission trips. The platform is designed to help students with smaller networks leverage online tools to accelerate their fundraising efforts. This project was made during a design sprint week as part of the end of my internship with Cru, where groups of 6 interns each researched the biggest organizational barriers that are preventing summer missions participation, and built solutions to address these barriesrs. 
