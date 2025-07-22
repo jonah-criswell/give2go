@@ -6,18 +6,7 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-Rails.application.config.after_initialize do
-  begin
-    ActiveRecord::Base.connection
-    unless ActiveRecord::Base.connection.table_exists?('missions') # replace with a key table from your schema
-      Rails.logger.info("Running migrations and seeds on startup...")
-      ActiveRecord::MigrationContext.new('db/migrate', ActiveRecord::SchemaMigration).migrate
-      load(Rails.root.join('db', 'seeds.rb'))
-    end
-  rescue => e
-    Rails.logger.error("Error running seeds: #{e.message}")
-  end
-end
+# Removed Rails.application.config.after_initialize block that auto-ran migrations and seeds
 
 module Backend
   class Application < Rails::Application
