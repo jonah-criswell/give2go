@@ -82,7 +82,7 @@ Let's say you donate **$100** to a group of **4 students**:
 
 **Our system is smart:** The excess $5 from Student A is automatically redistributed evenly among the other students who still need funds, ensuring the best possible distribution without any student exceeding their goal!
 
-## Unequal Distribution Algorithm
+🎲## Unequal Distribution Algorithm
 
 Give2Go also supports an advanced unequal distribution algorithm that allows donors to bias the distribution toward students with higher fundraising needs. This feature provides more nuanced control over how funds are distributed, by using a carefully designed mathematical forumla to calculate the funds each student recieves.
 
