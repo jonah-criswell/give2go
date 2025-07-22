@@ -1,5 +1,5 @@
 # 💸Give2Go
-Cru Internship design sprint capstone - Give2Go
+Cru Internship design sprint capstone - Give2Go - Access the live demo: https://give2go.vercel.app/
 
 # 🔎Overview
   Give2Go is a mission trip fundraising platform that connects generous donors with students who are passionate about making a difference through Cru's mission trips. The platform is designed to help students with smaller networks leverage online tools to accelerate their fundraising efforts. This project was made during a design sprint week as part of the end of my internship with Cru, where groups of 6 interns each researched the biggest organizational barriers that are preventing summer missions participation, and built solutions to address these barriesrs. 
@@ -40,7 +40,7 @@ Cru Internship design sprint capstone - Give2Go
 
 ### 🧠Development tools and philosopy:
 - **Cursor IDE**: Leveraged cutting-edge articial intelligence tools to drastically accelerate development - crucial for getting production-grade systems off the ground in just one week
-- **Deployment**: (Coming Soon)
+- **Deployment**: Utilized Render to deploy the API and Vercel to deploy the Vite React frontend, using an AWS S3 bucket to handle image uploads and storage.
 - **Prototyping**: The purpose of this project was to be a proof-of-concept, taking advantage of AI to write a lot of the code, to focus more on system architecture, UI/UX design, creative features, and demonstrating
 - **Capstone**: AI-assisted code does not mean this app was built with a single prompt - many hours of careful decision making & intentional design patterns were critical to publish a polished final product
 - **Proof of Concept**: This app was rapidly built in less than a week - expect bugs!
