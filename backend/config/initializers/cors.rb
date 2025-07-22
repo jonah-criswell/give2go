@@ -18,7 +18,7 @@
 # Allow frontend dev server
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins /http:\/\/localhost:\d+/
+    origins /http:\/\/localhost:\d+/, 'https://give2go.vercel.app'
     resource "*", headers: :any, methods: [:get, :post, :put, :patch, :delete, :options, :head]
   end
 end
