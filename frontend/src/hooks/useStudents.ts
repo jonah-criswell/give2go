@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Student } from '../types';
+import { apiFetch } from '../api';
 
 export const useStudents = () => {
    const [students, setStudents] = useState<Student[]>([]);
@@ -9,7 +10,7 @@ export const useStudents = () => {
    const fetchStudents = async () => {
       setLoading(true);
       try {
-         const response = await fetch('/api/v1/students?random=true');
+         const response = await apiFetch('/api/v1/students?random=true');
          if (response.ok) {
             const data = await response.json();
             setStudents(data);

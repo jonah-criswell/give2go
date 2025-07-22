@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { FormData, Trip } from '../types';
 import { useUniversities } from '../hooks/useUniversities';
+import { apiFetch } from '../api';
 
 interface AuthFormProps {
    isLogin: boolean;
@@ -55,7 +56,7 @@ export const AuthForm = ({
    useEffect(() => {
       const fetchTrips = async () => {
          try {
-            const response = await fetch('/api/v1/trips');
+            const response = await apiFetch('/api/v1/trips');
             if (response.ok) {
                const trips = await response.json();
                setAvailableTrips(trips);

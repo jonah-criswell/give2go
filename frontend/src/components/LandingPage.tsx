@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Navbar } from './Navbar';
 import type { Student } from '../types';
+import { apiFetch } from '../api';
 
 interface LandingPageProps {
    currentStudent: Student | null;
@@ -32,7 +33,7 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick,
       const fetchFeaturedStudents = async () => {
          setLoading(true);
          try {
-            const response = await fetch('/api/v1/students');
+            const response = await apiFetch('/api/v1/students');
             if (response.ok) {
                const students: Student[] = await response.json();
 
@@ -102,7 +103,7 @@ export const LandingPage = ({ currentStudent, onNavigate, onLogout, onHomeClick,
    useEffect(() => {
       const fetchSearchData = async () => {
          try {
-            const response = await fetch('/api/v1/students');
+            const response = await apiFetch('/api/v1/students');
             if (response.ok) {
                const students: Student[] = await response.json();
 

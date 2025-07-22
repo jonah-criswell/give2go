@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiFetch } from '../api';
 
 export interface University {
    id: number;
@@ -15,7 +16,7 @@ export const useUniversities = () => {
       const fetchUniversities = async () => {
          setLoading(true);
          try {
-            const response = await fetch('/api/v1/universities');
+            const response = await apiFetch('/api/v1/universities');
             if (response.ok) {
                const data = await response.json();
                setUniversities(data);

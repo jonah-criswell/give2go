@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Student, FormData } from '../types';
+import { apiFetch } from '../api';
 
 export const useAuth = () => {
    const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
@@ -19,7 +20,7 @@ export const useAuth = () => {
          // Then fetch fresh data from API
          const fetchFreshData = async () => {
             try {
-               const response = await fetch('/api/v1/student/profile', {
+               const response = await apiFetch('/api/v1/student/profile', {
                   headers: {
                      "Authorization": `Bearer ${token}`
                   }
@@ -65,7 +66,7 @@ export const useAuth = () => {
             ? { email: formData.email, password: formData.password }
             : { student: formData, trip_id: selectedTripId };
 
-         const response = await fetch(`${endpoint}`, {
+         const response = await apiFetch(`${endpoint}`, {
             method: "POST",
             headers: {
                "Content-Type": "application/json",

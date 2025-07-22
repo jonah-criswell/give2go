@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Navbar } from './Navbar';
 import type { Student, ProfileFormData, Donation } from '../types';
+import { apiFetch } from '../api';
 
 interface ProfileProps {
    currentStudent: Student | null;
@@ -38,7 +39,7 @@ export const Profile = ({ currentStudent, setCurrentStudent, onNavigate }: Profi
          // Fetch donations for this student
          setDonationsLoading(true);
          setDonationsError('');
-         fetch(`/api/v1/donations?student_id=${currentStudent.id}`)
+         apiFetch(`/api/v1/donations?student_id=${currentStudent.id}`)
             .then(res => {
                if (!res.ok) throw new Error('Failed to fetch donations');
                return res.json();
@@ -90,7 +91,7 @@ export const Profile = ({ currentStudent, setCurrentStudent, onNavigate }: Profi
             formDataToSend.append('student[profile_picture]', selectedFile);
          }
 
-         const response = await fetch('/api/v1/student/profile', {
+         const response = await apiFetch('/api/v1/student/profile', {
             method: 'PATCH',
             headers: {
                'Authorization': `Bearer ${token}`

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import type { Student } from '../types';
+import { apiFetch } from '../api';
 
 interface DonateRevealPageProps {
    onStudentsUpdate?: () => void;
@@ -18,7 +19,7 @@ export const DonateRevealPage = ({ onStudentsUpdate }: DonateRevealPageProps) =>
 
    useEffect(() => {
       setLoading(true);
-      fetch('/api/v1/students')
+      apiFetch('/api/v1/students')
          .then(res => res.json())
          .then(data => {
             const found = data.find((s: Student) => String(s.id) === studentId);

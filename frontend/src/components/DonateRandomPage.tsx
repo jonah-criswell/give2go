@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Student, Trip } from '../types';
 import { useUniversities } from '../hooks/useUniversities';
+import { apiFetch } from '../api';
 
 export const DonateRandomPage = () => {
    const navigate = useNavigate();
@@ -24,12 +25,10 @@ export const DonateRandomPage = () => {
    const [revealed, setRevealed] = useState(false);
 
    useEffect(() => {
-      fetch('/api/v1/students')
+      apiFetch('/api/v1/students')
          .then(res => res.json())
-         .then(data => {
-            setStudents(data);
-         });
-      fetch('/api/v1/trips')
+         .then(data => setStudents(data));
+      apiFetch('/api/v1/trips')
          .then(res => res.json())
          .then(data => setTrips(data));
    }, []);
@@ -173,7 +172,7 @@ export const DonateRandomPage = () => {
       }
       setLoading(true);
       try {
-         const res = await fetch('/api/v1/donations', {
+         const res = await apiFetch('/api/v1/donations', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

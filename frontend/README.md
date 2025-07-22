@@ -67,3 +67,18 @@ export default tseslint.config([
   },
 ])
 ```
+
+## API URL Configuration
+
+This app uses an environment variable `VITE_API_URL` to determine where to send API requests. By default, it will use this variable as the base for all `/api/v1/...` requests.
+
+- In development, create a `.env` file in the frontend directory with:
+  ```
+  VITE_API_URL=http://localhost:3000
+  ```
+- In production (Vercel), set the environment variable `VITE_API_URL` to your backend URL:
+  ```
+  VITE_API_URL=https://give2go.onrender.com
+  ```
+
+If not set, API requests may fail in production.

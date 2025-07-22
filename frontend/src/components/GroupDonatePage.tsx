@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import type { Student } from '../types';
+import { apiFetch } from '../api';
 
 interface GroupDonatePageProps {
    currentStudent: Student | null;
@@ -35,7 +36,7 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
    useEffect(() => {
       const fetchStudents = async () => {
          try {
-            const response = await fetch('/api/v1/students');
+            const response = await apiFetch('/api/v1/students');
             if (response.ok) {
                const studentsData: Student[] = await response.json();
                setStudents(studentsData);
@@ -145,7 +146,7 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
       setLoading(true);
 
       try {
-         const response = await fetch('/api/v1/group_donations', {
+         const response = await apiFetch('/api/v1/group_donations', {
             method: 'POST',
             headers: {
                'Content-Type': 'application/json',
@@ -200,7 +201,7 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
             ...(selectedGroup === 'trip' && selectedTrip && { trip_name: selectedTrip })
          });
 
-         const response = await fetch(`/api/v1/group_donations/preview?${params}`);
+         const response = await apiFetch(`/api/v1/group_donations/preview?${params}`);
 
          if (response.ok) {
             const data = await response.json();
@@ -228,7 +229,7 @@ export const GroupDonatePage = ({ currentStudent, onNavigate, onLogout, onHomeCl
             ...(selectedGroup === 'trip' && selectedTrip && { trip_name: selectedTrip })
          });
 
-         fetch(`/api/v1/group_donations/preview?${params}`).catch(() => {
+         apiFetch(`/api/v1/group_donations/preview?${params}`).catch(() => {
             // Silently fail - this is just for cache warming
          });
       }

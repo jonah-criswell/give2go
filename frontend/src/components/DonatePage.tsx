@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Student } from '../types';
+import { apiFetch } from '../api';
 
 interface DonatePageProps {
    student: Student;
@@ -64,7 +65,7 @@ export const DonatePage = ({ student, onBack, onDonationSuccess }: DonatePagePro
       }
       setLoading(true);
       try {
-         const res = await fetch('/api/v1/donations', {
+         const res = await apiFetch('/api/v1/donations', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

@@ -17,7 +17,7 @@ import { GroupDonateSuccessPage } from "./components/GroupDonateSuccessPage";
 import { GroupDonateInfoPage } from "./components/GroupDonateInfoPage";
 import { DonateThankYouPage } from "./components/DonateThankYouPage";
 import type { Student } from "./types";
-
+import { apiFetch } from './api';
 
 
 function App() {
@@ -45,7 +45,7 @@ function App() {
 
     useEffect(() => {
       setLoading(true);
-      fetch(`/api/v1/students`)
+      apiFetch(`/api/v1/students`)
         .then(res => res.json())
         .then(data => {
           // data is the array itself
