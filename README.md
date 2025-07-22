@@ -22,7 +22,7 @@ Note - the app is not yet optimized for mobile. For the best viewing experience,
 - **Group Donations**: Support multiple students with a single donation using smart fund distribution, by giving a donation to a university, trip, or even the entire student base
 - **Search & Filter**: Find students by name, university or trip, and sort by progress to give to students struggling to raise funds
 - **Real-time Updates**: See fundraising progress and goal completion in real-time
-- **Authentication**: Allows students to set up an account to get their give link on the site. This is mainly for demo purposes; in practice, students would use their Okta/Cru account they used to apply for their trip.
+- **Authentication**: Allows students to set up an account to get their give link on the site. This is mainly for demo purposes; in practice, students would use their Okta/Cru account they used to apply for their trip. The profile page and the sign in and register pages are less
 - **Modern UI**: Leverages modern frontend frameworks for a beautiful and contempory user interface, powered by a powerful backend API.
 
 # 🛠️Tech Stack and Implementation:
